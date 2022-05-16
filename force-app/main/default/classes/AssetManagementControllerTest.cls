@@ -35,7 +35,7 @@ public with sharing class AssetManagementControllerTest {
         List<Asset> assetList = [Select Id from Asset limit 1];
         List<String> responseList;
         if(!assetList.isEmpty()){
-            responseList = AssetManagementController.renewOrCancelAsset(assetList, 'Renew', null);
+            responseList = AssetManagementController.renewCancelAsset(assetList, 'Renew', null);
             System.assertEquals(1, responseList.size());
         }
     }
@@ -46,7 +46,7 @@ public with sharing class AssetManagementControllerTest {
         List<Asset> assetList = [Select Id from Asset limit 1];
         List<String> responseList;
         if(!assetList.isEmpty()){
-            responseList = AssetManagementController.renewOrCancelAsset(assetList, 'Cancel', system.today());
+            responseList = AssetManagementController.renewCancelAsset(assetList, 'Cancel', system.today());
             System.assertEquals(1, responseList.size());
         }
     }

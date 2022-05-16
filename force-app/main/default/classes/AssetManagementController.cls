@@ -2,20 +2,22 @@
  * 
  */
 public with sharing class AssetManagementController {
-    private static final String renewAPIUri = '/services/data/v55.0/asset-management/assets/collection/actions/initiate-renewal';
-    private static final String cancelAPIUri = '/services/data/v55.0/asset-management/assets/collection/actions/initiate-cancellation'; 
 
+    /**
+     * This is used for retreiving the Assets from Account which has HasLifecycleManagement is true
+     */
     @AuraEnabled(cacheable=true)
     public static List<Asset> getAssetsByAccount(String accountId){
-        //RenewalTerm, RenewalTermUnit, LifecycleStartDate, LifecycleEndDate
-        //and HasLifecycleManagement = TRUE 
         return [SELECT Id, Name, LifecycleStartDate, LifecycleEndDate, RenewalTerm, RenewalTermUnit FROM Asset Where AccountId =: accountId and HasLifecycleManagement = TRUE Order By createdDate];
 
     }
+
+    /**
+     * Used to call the SM Renew and Cancel service through the Apex via Connect API
+     */
     
     @AuraEnabled
-    public static List<String> renewOrCancelAsset(List<Asset> assetList, String type, Datetime cancelDate){
-        system.debug('<<<<<<assetList>>>>>'+assetList);
+    public static List<String> renewCancelAsset(List<Asset> assetList, String type, Datetime cancelDate){
         List<String> responseList = new List<String>();
         ConnectApi.RevenueAsyncRepresentation output;
         for(Asset asset : assetList) {

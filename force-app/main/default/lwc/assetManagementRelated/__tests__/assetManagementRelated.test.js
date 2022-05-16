@@ -1,7 +1,7 @@
 import { createElement } from 'lwc';
 import  AssetManagementRelated from 'c/assetManagementRelated';
 import getAssetsByAccount from '@salesforce/apex/AssetManagementController.getAssetsByAccount';
-import renewCancel from '@salesforce/apex/AssetManagementController.renewOrCancelAsset';
+import renewCancel from '@salesforce/apex/AssetManagementController.renewCancelAsset';
 
 const getMockAssets = require('./data/getAssetList.json');
 const selectedRows = [ {
@@ -37,7 +37,7 @@ jest.mock(
 );
 
 jest.mock(
-  '@salesforce/apex/AssetManagementController.renewOrCancelAsset',
+  '@salesforce/apex/AssetManagementController.renewCancelAsset',
   () => {
       const {
           createApexTestWireAdapter

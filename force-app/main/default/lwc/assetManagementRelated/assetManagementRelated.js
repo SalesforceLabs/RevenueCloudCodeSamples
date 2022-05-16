@@ -1,6 +1,6 @@
 import { LightningElement, wire, track, api} from 'lwc';
 import getAssets from '@salesforce/apex/AssetManagementController.getAssetsByAccount'
-import renewCancel from '@salesforce/apex/AssetManagementController.renewOrCancelAsset'
+import renewCancel from '@salesforce/apex/AssetManagementController.renewCancelAsset'
 const columns = [
     { label: 'Asset Name', fieldName: 'Name', type: 'text' },
     { label: 'Lifecycle Start Date', fieldName: 'LifecycleStartDate',type: 'date', typeAttributes: {

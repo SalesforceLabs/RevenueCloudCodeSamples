@@ -30,7 +30,7 @@ export default class AssetManagement extends LightningElement {
     @track columns = columns;
     selectedRows = [];
     @track cancelledDate
-    @track loaded = false;
+    @track isLoaded = false;
 
     @wire(getAssets , {accountId : '$recordId'})
     assets({error, data}){
@@ -55,16 +55,16 @@ export default class AssetManagement extends LightningElement {
 
     renewCancelAction = event => {
         let actionType = event.currentTarget.name;
-        //new Date(this.cancelledDate.toString().split('GMT')[0]+' UTC').toISOString()
-        this.loaded = true;
+
+        this.isLoaded = true;
         console.log(actionType);
         let date = this.cancelledDate === undefined ? new Date() : this.cancelledDate;
         renewCancel({assetList : this.selectedRows, type: actionType, cancelDate: date})
         .then(() => {
-            this.loaded = false
+            this.isLoaded = false
         })
         .catch((error) => {
-            this.loaded = false;
+            this.isLoaded = false;
             this.error = error;
         });
         this.isCancelDatePopup = false;

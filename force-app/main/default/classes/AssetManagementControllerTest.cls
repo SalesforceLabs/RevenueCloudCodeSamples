@@ -1,3 +1,7 @@
+/**
+ * Tests for the Asset Management Controller
+ * ConnectAPI needs SeeAllData = true.
+ */
 @IsTest(SeeAllData=true)
 public with sharing class AssetManagementControllerTest {
     
@@ -11,7 +15,6 @@ public with sharing class AssetManagementControllerTest {
         Id spb = Test.getStandardPricebookId();
         //Updating Standard Price Book
         update new Pricebook2(Id = spb , isActive = true);
-        
  
         PricebookEntry priceBookEntry = new PricebookEntry(
             Pricebook2Id = spb, Product2Id = product.Id, 
@@ -33,6 +36,7 @@ public with sharing class AssetManagementControllerTest {
         makeData();
         
         List<Asset> assetList = [Select Id from Asset limit 1];
+        System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
         List<String> responseList;
         if(!assetList.isEmpty()){
             responseList = AssetManagementController.renewCancelAsset(assetList, 'Renew', null);
@@ -44,6 +48,7 @@ public with sharing class AssetManagementControllerTest {
         makeData();
         
         List<Asset> assetList = [Select Id from Asset limit 1];
+        System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
         List<String> responseList;
         if(!assetList.isEmpty()){
             responseList = AssetManagementController.renewCancelAsset(assetList, 'Cancel', system.today());

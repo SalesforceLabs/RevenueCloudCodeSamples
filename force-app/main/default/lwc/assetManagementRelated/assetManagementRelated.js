@@ -22,8 +22,8 @@ const columns = [
 
 
 export default class AssetManagement extends LightningElement {
-    activateButtons = true;
-    showCancelPopup = false;
+    isButtonsActivated = true;
+    isCancelDatePopup = false;
     @track assetList;
     @track error;
     @api recordId
@@ -46,11 +46,11 @@ export default class AssetManagement extends LightningElement {
     handleRowSelection = event => {
         this.selectedRows =event.detail.selectedRows;
         console.log(this.selectedRows);
-        this.activateButtons =  this.selectedRows.length > 0 ?  false : true;
+        this.isButtonsActivated =  this.selectedRows.length > 0 ?  false : true;
     }
 
-    renewCancelPopup = () => {
-        this.showCancelPopup=  this.showCancelPopup === false ? true : false
+    toggleCancelDatePopup = () => {
+        this.isCancelDatePopup = this.isCancelDatePopup === false ? true : false
     }
 
     renewCancelAction = event => {
@@ -60,23 +60,21 @@ export default class AssetManagement extends LightningElement {
         console.log(actionType);
         let date = this.cancelledDate === undefined ? new Date() : this.cancelledDate;
         renewCancel({assetList : this.selectedRows, type: actionType, cancelDate: date})
-        .then((result) => {
-            
-            console.log('result',result);
+        .then(() => {
             this.loaded = false
         })
         .catch((error) => {
             this.loaded = false;
-            console.log('result',error);
+            this.error = error;
         });
-        this.showCancelPopup = false;
+        this.isCancelDatePopup = false;
     }
 
     handleDate(event){
         this.cancelledDate = event.currentTarget.value;
     }
 
-    get activateCancelButton(){
+    get toggleCancelAssetButton(){
         return this.selectedRows.length > 0 && this.cancelledDate !== undefined ?  false : true;
     }
 

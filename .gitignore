@@ -5,6 +5,7 @@
 # Salesforce cache
 .sf/
 .sfdx/
+
 .localdevserver/
 deploy-options.json
 
@@ -38,3 +39,5 @@ $RECYCLE.BIN/
 
 # Local environment variables
 .env
+.vscode/
+.husky/

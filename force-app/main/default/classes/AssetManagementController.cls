@@ -1,10 +1,9 @@
-/**
- * 
- */
 public with sharing class AssetManagementController {
-
+    
     /**
      * This is used for retreiving the Assets from Account which has HasLifecycleManagement is true
+     * @param accountId
+     * @return list of Assets with StartDate, EndDate and Renewal Fields
      */
     @AuraEnabled(cacheable=true)
     public static List<Asset> getAssetsByAccount(String accountId){
@@ -14,6 +13,9 @@ public with sharing class AssetManagementController {
 
     /**
      * Used to call the SM Renew and Cancel service through the Apex via Connect API
+     * @param assetList list of assets to be renewed or cancelled
+     * @param cancelDate Date for the Cancel Service,
+     * @return list of responses from the connectAPI output
      */
     
     @AuraEnabled
@@ -41,6 +43,4 @@ public with sharing class AssetManagementController {
         }
         return responseList;
     }
-
-   
 }

@@ -1,6 +1,8 @@
 import { LightningElement, wire, track, api} from 'lwc';
 import getAssets from '@salesforce/apex/AssetManagementController.getAssetsByAccount'
-import renewCancel from '@salesforce/apex/AssetManagementController.renewCancelAsset'
+import renewAssets from '@salesforce/apex/AssetManagementController.renewAssets'
+import cancelAssets from '@salesforce/apex/AssetManagementController.cancelAssets'
+
 const columns = [
     { label: 'Asset Name', fieldName: 'Name', type: 'text' },
     { label: 'Lifecycle Start Date', fieldName: 'LifecycleStartDate',type: 'date', typeAttributes: {
@@ -31,6 +33,7 @@ export default class AssetManagement extends LightningElement {
     selectedRows = [];
     @track cancelledDate
     @track isLoaded = false;
+    requestIds = [];
 
     @wire(getAssets , {accountId : '$recordId'})
     assets({error, data}){
@@ -53,18 +56,37 @@ export default class AssetManagement extends LightningElement {
         this.isCancelDatePopup = this.isCancelDatePopup === false ? true : false
     }
 
-    renewCancelAction = event => {
+    handleAction = event => {
         let actionType = event.currentTarget.name;
 
         this.isLoaded = true;
-        console.log(actionType);
-        let date = this.cancelledDate === undefined ? new Date() : this.cancelledDate;
-        renewCancel({assetList : this.selectedRows, type: actionType, cancelDate: date})
-        .then(() => {
-            this.isLoaded = false
+        if(actionType == 'Renew') {
+            this.handleRenewAssets();
+        }
+        else {
+            this.cancelAssets();
+        }
+        this.isLoaded = false;
+        this.isCancelDatePopup = false;
+    }
+
+
+    handleRenewAssets = () =>{
+        renewAssets({assetList : this.selectedRows})
+        .then((data) => {
+            this.requestIds = data;
         })
         .catch((error) => {
-            this.isLoaded = false;
+            this.error = error;
+        });
+    }
+
+    handleCancelAssets = () =>{
+        cancelAssets({assetList : this.selectedRows, cancelDate: this.cancelledDate})
+        .then((data) => {
+            this.requestIds = data;
+        })
+        .catch((error) => {
             this.error = error;
         });
         this.isCancelDatePopup = false;

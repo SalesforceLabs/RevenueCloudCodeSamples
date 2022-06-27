@@ -8,6 +8,7 @@ export default class EventManager extends LightningElement {
     renewSubscription = {};
      @api cancelChannel = '/event/AssetCancelInitiatedEvent';
      @api renewChannel = '/event/AssetRenewInitiatedEvent';
+     @api requestIds;
 
     // Initializes the component
     connectedCallback() {

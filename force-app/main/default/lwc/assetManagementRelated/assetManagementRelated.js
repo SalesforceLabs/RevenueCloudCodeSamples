@@ -33,7 +33,6 @@ export default class AssetManagement extends LightningElement {
     selectedRows = [];
     @track cancelledDate
     @track isLoaded = false;
-    requestIds = [];
 
     @wire(getAssets , {accountId : '$recordId'})
     assets({error, data}){
@@ -60,11 +59,12 @@ export default class AssetManagement extends LightningElement {
         let actionType = event.currentTarget.name;
 
         this.isLoaded = true;
-        if(actionType == 'Renew') {
+        console.log('actionType',actionType);
+        if(actionType === 'Renew') {
             this.handleRenewAssets();
         }
-        else {
-            this.cancelAssets();
+        else if(actionType === 'Cancel') {
+            this.handleCancelAssets();
         }
         this.isLoaded = false;
         this.isCancelDatePopup = false;
@@ -74,7 +74,7 @@ export default class AssetManagement extends LightningElement {
     handleRenewAssets = () =>{
         renewAssets({assetList : this.selectedRows})
         .then((data) => {
-            this.requestIds = data;
+            console.log(data);
         })
         .catch((error) => {
             this.error = error;
@@ -84,7 +84,7 @@ export default class AssetManagement extends LightningElement {
     handleCancelAssets = () =>{
         cancelAssets({assetList : this.selectedRows, cancelDate: this.cancelledDate})
         .then((data) => {
-            this.requestIds = data;
+            console.log(data);
         })
         .catch((error) => {
             this.error = error;

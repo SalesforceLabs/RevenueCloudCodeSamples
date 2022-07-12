@@ -4,10 +4,10 @@
                             data = {assetList} 
                             columns = {columns}>
         </lightning-datatable>
-        <c-event-manager request-ids=""></c-event-manager>
+        <c-event-manager></c-event-manager>
         <div slot="actions">
             <lightning-button-group>
-                <lightning-button variant="neutral" label="Renew Assets" disabled={isButtonsActivated} name="Renew" onclick ={handleAction}></lightning-button>
+                <lightning-button variant="neutral" label="Renew Assets" disabled={isButtonsActivated} name="Renew" onclick ={handleAction} data-id="Renew"></lightning-button>
                 <lightning-button variant="neutral" label="Cancel Assets" disabled={isButtonsActivated} name="CancelDatePopup" onclick ={toggleCancelDatePopup} data-id="CancelAction"></lightning-button>
             </lightning-button-group>
             <template if:true={isLoaded}>
@@ -27,8 +27,8 @@
                     </div>
                     <footer class="slds-modal__footer">
                         <lightning-button-group>
-                            <lightning-button variant="brand" label="Cancel Assets" title="Cancel Assets" disabled ={toggleCancelAssetButton} onclick={handleAction} name="Cancel" data-id="CancelAsset"></lightning-button>
-                            <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={toggleCancelAssetButton} ></lightning-button>
+                            <lightning-button variant="brand" label="Cancel Assets" title="Cancel Assets" name="Cancel" onclick={handleAction}  data-id="CancelAsset" disabled ={toggleCancelAssetButton}></lightning-button>
+                            <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={toggleCancelDatePopup} ></lightning-button>
                         </lightning-button-group>
                     </footer>
                 </div>

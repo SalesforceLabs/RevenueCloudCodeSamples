@@ -56,7 +56,7 @@ public with sharing class AssetManagementControllerTest {
         }
     }
     
-    @IsTest static void testgetAssetData() {
+    @IsTest static void testAssetData() {
         makeData();
         
         Id accountId = [Select Id from Account limit 1].Id;

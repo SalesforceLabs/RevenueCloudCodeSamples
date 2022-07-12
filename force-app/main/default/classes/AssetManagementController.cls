@@ -44,6 +44,7 @@ public with sharing class AssetManagementController {
     
     @AuraEnabled
     public static List<String> cancelAssets(List<Asset> assetList, Datetime cancelDate){
+        system.debug( 'test');
         List<String> responseList = new List<String>();
         ConnectApi.RevenueAsyncRepresentation output;
         ConnectApi.AssetMgmtInitiateCancellationInput input;

@@ -1,7 +1,7 @@
 import { createElement } from "lwc";
 import AssetManagementRelated from "c/assetManagementRelated";
 import getAssetsByAccount from "@salesforce/apex/AssetManagementController.getAssetsByAccount";
-import renewCancel from "@salesforce/apex/AssetManagementController.renewCancelAsset";
+import renewCancel from "@salesforce/apex/AssetManagementController.renewAssets";
 
 const getMockAssets = require("./data/getAssetList.json");
 const selectedRows = [
@@ -180,8 +180,9 @@ describe("c-asset-management-related", () => {
                 }
             })
         );
-        const buttonEl = element.shadowRoot.querySelector("lightning-button");
-
+        await flushPromises();
+        const buttonEl = element.shadowRoot.querySelector("lightning-button[data-id=Renew]");
+        
         buttonEl.click();
 
         // Wait for any asynchronous DOM updates

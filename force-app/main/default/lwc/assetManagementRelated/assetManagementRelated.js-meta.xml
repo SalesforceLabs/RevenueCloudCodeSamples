@@ -3,6 +3,13 @@
     <apiVersion>55.0</apiVersion>
     <isExposed>true</isExposed>
     <targets>
-       <target>lightning__RecordPage</target>
-   </targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">                
+            <objects>
+                <object>Account</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

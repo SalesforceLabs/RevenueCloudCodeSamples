@@ -1,7 +1,7 @@
 {
   "orgName": "Subscription Management",
   "edition": "Developer",
-  "features": ["EnableSetPasswordInApi", "RevSubscriptionManagement", "OrderSaveLogicEnabled"],
+  "features": ["RevSubscriptionManagement", "OrderSaveLogicEnabled"],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true

@@ -1,7 +1,8 @@
-import { LightningElement, api } from 'lwc';
-import { subscribe}  from 'lightning/empApi';
+import { LightningElement, api, wire } from 'lwc';
+import { subscribe, unsubscribe}  from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import currentUserId from '@salesforce/user/Id';
+import { CurrentPageReference } from 'lightning/navigation';
 
 export default class EventManager extends LightningElement {
 
@@ -15,6 +16,10 @@ export default class EventManager extends LightningElement {
         // Register listener
         this.handleRenewSubscribe();
         this.handleCancelSubscribe();
+    }
+
+    disconnectedCallback() {
+        this.unsubscribeEvents();
     }
 
     handleCancelSubscribe = () =>{
@@ -55,7 +60,7 @@ export default class EventManager extends LightningElement {
         const thisReference = this;
         const messageCallback = function(response) {
             let obj = JSON.parse(JSON.stringify(response));
-        
+            
             if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all events
 
                 let message = 'Order created: ' + obj.data.payload.RenewalRecordId;
@@ -79,5 +84,12 @@ export default class EventManager extends LightningElement {
             // Response contains the subscription information on renew call
             this.renewSubscription = response;
         });
+    }
+    
+    unsubscribeEvents() {
+        unsubscribe(this.renewSubscription);
+        unsubscribe(this.cancelSubscription);
+        this.cancelSubscription = null;
+        this.renewSubscription = null;
     }
 }

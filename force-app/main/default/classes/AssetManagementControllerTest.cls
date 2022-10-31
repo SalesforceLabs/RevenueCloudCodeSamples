@@ -37,10 +37,10 @@ public with sharing class AssetManagementControllerTest {
         
         List<Asset> assetList = [Select Id from Asset limit 1];
         System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
-        List<String> responseList;
+        List<AssetManagementController.AssetInfo> responseList;
         if(!assetList.isEmpty()){
             responseList = AssetManagementController.renewAssets(assetList);
-            System.assertEquals(1, responseList.size());
+            System.assertEquals(1, responseList.size(), 'Response size should be 1');
         }
     }
     
@@ -49,10 +49,10 @@ public with sharing class AssetManagementControllerTest {
         
         List<Asset> assetList = [Select Id from Asset limit 1];
         System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
-        List<String> responseList;
+        List<Asset> responseList;
         if(!assetList.isEmpty()){
             responseList = AssetManagementController.cancelAssets(assetList, system.today());
-            System.assertEquals(1, responseList.size());
+            System.assertEquals(1, responseList.size(), 'Response size should be 1');
         }
     }
     

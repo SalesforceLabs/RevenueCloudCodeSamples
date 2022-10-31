@@ -27,7 +27,9 @@ export default class EventManager extends LightningElement {
         const thisReference = this;
         const messageCallback = function(response) {
             let obj = JSON.parse(JSON.stringify(response));
+            console.log('<<<<>>>>>'+JSON.stringify(obj));
             if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all events
+                /*
                 let message = 'Order created: ' + obj.data.payload.CancellationRecordId;
 
                 let variant = 'success'
@@ -40,8 +42,8 @@ export default class EventManager extends LightningElement {
                     variant: variant,
                     mode : "sticky"
                 });
-
-                thisReference.dispatchEvent(evt);
+                */
+                thisReference.dispatchEvent(new CustomEvent('custevent', { detail: obj }));
             }
             // Response contains the payload of the new message received
         };
@@ -62,6 +64,7 @@ export default class EventManager extends LightningElement {
             let obj = JSON.parse(JSON.stringify(response));
             
             if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all events
+                /*
 
                 let message = 'Order created: ' + obj.data.payload.RenewalRecordId;
                 let variant = 'success'
@@ -73,9 +76,9 @@ export default class EventManager extends LightningElement {
                     message: message,
                     variant: variant,
                     mode : "sticky"
-                });
+                });*/
 
-                thisReference.dispatchEvent(evt);
+                thisReference.dispatchEvent(new CustomEvent('custevent', { detail: obj }));
             }
             // Response contains the payload of the new message received
         };

@@ -4,7 +4,7 @@
                             data = {assetList} 
                             columns = {columns}>
         </lightning-datatable>
-        <c-event-manager></c-event-manager>
+        <c-event-manager oncustevent={handleEvent}></c-event-manager>
         <div slot="actions">
             <lightning-button-group>
                 <lightning-button variant="neutral" label="Renew Assets" disabled={isButtonsActivated} name="Renew" onclick ={handleAction} data-id="Renew"></lightning-button>

@@ -1,6 +1,7 @@
 public with sharing class AssetManagementController {
 
     private static final Integer REVCLOUDAPILIMIT = Integer.valueOf(System.Label.RevCloudAPILimit);
+    private static final String ORG_BASE_URL = URL.getSalesforceBaseUrl().getHost();
     
     /**
      * This is used for retreiving the Assets from Account which has HasLifecycleManagement is true
@@ -9,20 +10,28 @@ public with sharing class AssetManagementController {
      */
     @AuraEnabled(cacheable=true)
     public static List<AssetInfo> getAssetsByAccount(String accountId){
-        List<AssetInfo> assetInfoList = new List<AssetInfo>();
+        Map<Id, AssetInfo> assetInfoMap = new Map<Id, AssetInfo>();
         AssetInfo assetInfo;
+        //First getting all the Assets of the Account and adding AssetInfo into the map
         for(Asset asset : [SELECT Id, Name, LifecycleStartDate, LifecycleEndDate, RenewalTerm, RenewalTermUnit 
         FROM Asset Where AccountId =: accountId and HasLifecycleManagement = TRUE WITH SECURITY_ENFORCED Order By createdDate]){
             assetInfo = new AssetInfo();
             assetInfo.assetId = asset.Id;
-            assetInfo.name = asset.Name;
+            assetInfo.name = asset.name;
             assetInfo.lifeCycleStartDate = asset.LifecycleStartDate;
             assetInfo.lifeCycleEndDate = asset.LifecycleEndDate;
-            assetInfo.renewalTerm = asset.renewalTerm;
-            assetInfo.renewalTermUnit = asset.renewalTermUnit;
-            assetInfoList.add(assetInfo);
+            assetInfo.renewalTerm = asset.RenewalTerm;
+            assetInfo.renewalTermUnit = asset.RenewalTermUnit;
+            assetInfo.recordURL = ORG_BASE_URL + '/'+ asset.Id;
+            assetInfoMap.put(asset.Id, assetInfo);
         }
-        return assetInfoList;
+
+        //If there is a bundle to show the heirarchy, for every AssetInfo parent Id is required to generate the tree here
+        //Using the relation to populate the parentId to the POJO AssetInfo.
+        for(AssetRelationShip ars :  [SELECT Id, AssetId,  RelatedAssetid FROM AssetRelationship where Asset.AccountId =: accountId WITH SECURITY_ENFORCED Order By AssetId]){
+            assetInfoMap.get(ars.RelatedAssetid).parentId = ars.AssetId;
+        }
+        return assetInfoMap.values();
     }
 
     /**
@@ -85,6 +94,43 @@ public with sharing class AssetManagementController {
         return responseList.values();
     }
 
+
+    /**
+     * Used to call the SM Cancel service through the Apex via Connect API
+     * @param assetList list of assets to be renewed or cancelled
+     * @param cancelDate Date for the Cancel Service,
+     * @return list of responses from the connectAPI output
+     */
+    
+    @AuraEnabled
+    public static List<AssetInfo> amendAssets(List<AssetInfo> assetList, Datetime amendDate, Integer quantity){
+        Map<Id, AssetInfo> responseList = new Map<Id, AssetInfo>();
+        Map<Id, AssetInfo> assetMap = new Map<Id, AssetInfo>();
+        List<Id> assetIds = new List<String>();
+        ConnectApi.RevenueAsyncRepresentation response;
+        for(AssetInfo asset : assetList) {
+            assetIds.add(asset.assetId);
+            assetMap.put(asset.assetId, asset);
+            if(assetIds.size() == REVCLOUDAPILIMIT){
+                response = amendAssetsAPI(assetIds, amendDate, quantity);
+                responseList = addStatusURL(assetIds, assetMap, response);
+                assetIds = new List<String>();
+            }
+        }
+        if(!assetIds.isEmpty()){
+            response = amendAssetsAPI(assetIds, amendDate, quantity);
+            responseList = addStatusURL(assetIds, assetMap, response);
+        }
+        System.debug('<<<<< responseList >>>>'+responseList);
+        return responseList.values();
+    }
+
+    @AuraEnabled
+    public static Map<Id, RevenueAsyncOperation> processAsyncData(List<String> asyncIds) {
+        System.debug('<<<asyncIds>>>  '+asyncIds);
+        return new Map<Id, RevenueAsyncOperation>([SELECT Id, Status FROM RevenueAsyncOperation Where Id IN: asyncIds WITH SECURITY_ENFORCED]);
+    }
+
     private static Map<Id, AssetInfo> addStatusURL(List<String> assetIds, Map<Id, AssetInfo> assetMap, ConnectApi.RevenueAsyncRepresentation response){
         if(response.requestIdentifier != null) {
             Integer index=response.statusURL.lastIndexOf('/');
@@ -98,7 +144,7 @@ public with sharing class AssetManagementController {
         throw new AuraHandledException('Error While sending the request');
     }
 
-    private static ConnectApi.RevenueAsyncRepresentation renewAssetsAPI(List<String> assetIds){
+    public static ConnectApi.RevenueAsyncRepresentation renewAssetsAPI(List<String> assetIds){
         ConnectApi.AssetMgmtInitiateRenewalInput input = new ConnectApi.AssetMgmtInitiateRenewalInput();
         input.assetIds = assetIds;
         ConnectApi.RevenueAsyncRepresentation output = ConnectApi.AssetMgmt.initiateRenewal(input);
@@ -114,12 +160,24 @@ public with sharing class AssetManagementController {
         return ConnectApi.AssetMgmt.initiateCancellation(input);
     }
 
+    private static ConnectApi.RevenueAsyncRepresentation amendAssetsAPI(List<String> assetIds, Datetime amendDate, Integer quantity){
+        ConnectApi.AssetMgmtInitiateAmendQtyInput input = new ConnectApi.AssetMgmtInitiateAmendQtyInput();
+        input.amendmentOutputType = ConnectApi.AssetMgmtAmendmentType.Order;
+        input.assetIds = assetIds;
+        input.startDate = amendDate;
+        input.quantityChange = quantity;
+        return ConnectApi.AssetMgmt.initiateAmendQuantity(input);
+    }
+
     public class AssetInfo { 
         @AuraEnabled
         public Id assetId{get;set;}
 
         @AuraEnabled
         public String name{get;set;}
+
+        @AuraEnabled
+        public String recordURL {get; set;}
 
         @AuraEnabled
         public Datetime lifeCycleStartDate{get;set;}
@@ -138,5 +196,8 @@ public with sharing class AssetManagementController {
 
         @AuraEnabled
         public String requestIdentifier{get;set;}
+
+        @AuraEnabled
+        public String parentId {get;set;}
     }
 }

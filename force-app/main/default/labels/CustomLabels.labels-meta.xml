@@ -7,4 +7,11 @@
         <shortDescription>RevCloudAPILimit</shortDescription>
         <value>100</value>
     </labels>
+    <labels>
+        <fullName>AssetManagement</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>AssetManagement</shortDescription>
+        <value>Asset Management [DEMO]</value>
+    </labels>
 </CustomLabels>

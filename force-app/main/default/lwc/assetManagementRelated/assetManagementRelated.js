@@ -4,6 +4,7 @@ import renewAssets from '@salesforce/apex/AssetManagementController.renewAssets'
 import cancelAssets from '@salesforce/apex/AssetManagementController.cancelAssets'
 import amendAssets from '@salesforce/apex/AssetManagementController.amendAssets'
 import processAsyncData from '@salesforce/apex/AssetManagementController.processAsyncData';
+import createAmendQuote from '@salesforce/apex/AssetManagementController.createAmendQuote';
 import AssetManagementLabel from '@salesforce/label/c.AssetManagement';
 
 const columns = [
@@ -161,6 +162,9 @@ export default class AssetManagement extends LightningElement {
         else if (actionType === 'Amend') {
             this.handleAmendAssets();
         }
+        else if (actionType === 'AmendQuote') {
+            this.handleAmendQuote();
+        }
         this.isLoaded = false;
         this.isCancelDatePopup = false;
     }
@@ -195,6 +199,18 @@ export default class AssetManagement extends LightningElement {
             .catch((error) => {
                 this.error = error;
             });
+        this.isDatePopup.isAmendDatePopup = false;
+    }
+
+    handleAmendQuote = () => {
+        
+        createAmendQuote({ assetList: this.selectedRows, amendDate: this.amendedDate, quantity: this.quantity, accountId : this.recordId})
+        .then((data) => {
+            console.log(data);
+        })
+        .catch((error) => {
+            this.error = error;
+        });
         this.isDatePopup.isAmendDatePopup = false;
     }
 

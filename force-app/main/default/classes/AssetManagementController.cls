@@ -13,9 +13,11 @@ public with sharing class AssetManagementController {
         Map<Id, AssetInfo> assetInfoMap = new Map<Id, AssetInfo>();
         AssetInfo assetInfo;
         //First getting all the Assets of the Account and adding AssetInfo into the map
-        for(Asset asset : [SELECT Id, Name, LifecycleStartDate, LifecycleEndDate, RenewalTerm, RenewalTermUnit 
+        for(Asset asset : [SELECT Id, Name, LifecycleStartDate, LifecycleEndDate, 
+                            RenewalTerm, RenewalTermUnit, AccountId, CurrentQuantity, Product2Id
         FROM Asset Where AccountId =: accountId and HasLifecycleManagement = TRUE WITH SECURITY_ENFORCED Order By createdDate]){
             assetInfo = new AssetInfo();
+            assetInfo.asset = asset;
             assetInfo.assetId = asset.Id;
             assetInfo.name = asset.name;
             assetInfo.lifeCycleStartDate = asset.LifecycleStartDate;
@@ -126,6 +128,37 @@ public with sharing class AssetManagementController {
     }
 
     @AuraEnabled
+    public static String createAmendQuote(List<AssetInfo> assetList, Datetime amendDate, Integer quantity, Id accountId){
+        Opportunity opp = new Opportunity();
+        opp.Name = 'Amend Opportunity '+ System.today();
+        opp.CloseDate = System.today().addMonths(6);
+        opp.StageName = 'Prospecting';
+        opp.AccountId = accountId;
+        insert opp;
+        Quote quote = new Quote();
+        quote.Name = 'Amend Quote ' + System.today();
+        quote.OpportunityId = opp.Id;
+        // Save the quote
+        insert quote;
+
+        List<QuoteLineItem> lineItemList = new List<QuoteLineItem>();
+        // Create a new quote line item for the asset
+        for(AssetInfo asset : assetList) {
+            QuoteLineItem lineItem = new QuoteLineItem();
+            lineItem.QuoteId = quote.Id;
+            lineItem.Asset__c = asset.assetId; // Set the AssetId to the ID of the asset you want to add to the quote
+            lineItem.Quantity = asset.asset.CurrentQuantity + quantity;
+            lineItem.Product2Id = asset.asset.Product2Id;
+            lineItem.EndDate = Date.valueOf(asset.lifeCycleEndDate);
+            lineItem.StartDate = Date.valueOf(asset.lifeCycleStartDate);
+            lineItemList.add(lineItem);
+        }
+        insert lineItemList;
+
+        return quote.Id;
+    }
+
+    @AuraEnabled
     public static Map<Id, RevenueAsyncOperation> processAsyncData(List<String> asyncIds) {
         System.debug('<<<asyncIds>>>  '+asyncIds);
         return new Map<Id, RevenueAsyncOperation>([SELECT Id, Status FROM RevenueAsyncOperation Where Id IN: asyncIds WITH SECURITY_ENFORCED]);
@@ -170,6 +203,9 @@ public with sharing class AssetManagementController {
     }
 
     public class AssetInfo { 
+        @AuraEnabled
+        public Asset asset{get;set;}
+
         @AuraEnabled
         public Id assetId{get;set;}
 

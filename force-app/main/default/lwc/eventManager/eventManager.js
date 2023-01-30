@@ -1,4 +1,4 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { subscribe, unsubscribe}  from 'lightning/empApi';
 import currentUserId from '@salesforce/user/Id';
 

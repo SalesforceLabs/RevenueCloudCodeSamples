@@ -33,6 +33,8 @@ public with sharing class AssetManagementController {
         for(AssetRelationShip ars :  [SELECT Id, AssetId,  RelatedAssetid FROM AssetRelationship where Asset.AccountId =: accountId WITH SECURITY_ENFORCED Order By AssetId]){
             assetInfoMap.get(ars.RelatedAssetid).parentId = ars.AssetId;
         }
+
+        system.debug(JSON.serialize(assetInfoMap.values()));
         return assetInfoMap.values();
     }
 
@@ -98,9 +100,10 @@ public with sharing class AssetManagementController {
 
 
     /**
-     * Used to call the SM Cancel service through the Apex via Connect API
+     * Used to call the SM Amend service through the Apex via Connect API
      * @param assetList list of assets to be renewed or cancelled
-     * @param cancelDate Date for the Cancel Service,
+     * @param amendDate Date for the amend Service extending
+     * @param quantity number of quantity to increase on the Asset
      * @return list of responses from the connectAPI output
      */
     
@@ -127,40 +130,11 @@ public with sharing class AssetManagementController {
         return responseList.values();
     }
 
-    @AuraEnabled
-    public static String createAmendQuote(List<AssetInfo> assetList, Datetime amendDate, Integer quantity, Id accountId){
-        Opportunity opp = new Opportunity();
-        opp.Name = 'Amend Opportunity '+ System.today();
-        opp.CloseDate = System.today().addMonths(6);
-        opp.StageName = 'Prospecting';
-        opp.AccountId = accountId;
-        insert opp;
-        Quote quote = new Quote();
-        quote.Name = 'Amend Quote ' + System.today();
-        quote.OpportunityId = opp.Id;
-        // Save the quote
-        insert quote;
-
-        List<QuoteLineItem> lineItemList = new List<QuoteLineItem>();
-        // Create a new quote line item for the asset
-        for(AssetInfo asset : assetList) {
-            QuoteLineItem lineItem = new QuoteLineItem();
-            lineItem.QuoteId = quote.Id;
-            lineItem.Asset__c = asset.assetId; // Set the AssetId to the ID of the asset you want to add to the quote
-            lineItem.Quantity = asset.asset.CurrentQuantity + quantity;
-            lineItem.Product2Id = asset.asset.Product2Id;
-            lineItem.EndDate = Date.valueOf(asset.lifeCycleEndDate);
-            lineItem.StartDate = Date.valueOf(asset.lifeCycleStartDate);
-            lineItemList.add(lineItem);
-        }
-        insert lineItemList;
-
-        return quote.Id;
-    }
-
+    /**
+     * Used to get RevenueAsyncOperation Status for the operation client made
+     */
     @AuraEnabled
     public static Map<Id, RevenueAsyncOperation> processAsyncData(List<String> asyncIds) {
-        System.debug('<<<asyncIds>>>  '+asyncIds);
         return new Map<Id, RevenueAsyncOperation>([SELECT Id, Status FROM RevenueAsyncOperation Where Id IN: asyncIds WITH SECURITY_ENFORCED]);
     }
 
@@ -171,7 +145,6 @@ public with sharing class AssetManagementController {
                 assetMap.get(assetId).statusURL = response.statusURL.substring(index+1); //Status temporory field used to datatable
                 assetMap.get(assetId).requestIdentifier = response.requestIdentifier;
             }
-
             return assetMap;
         }
         throw new AuraHandledException('Error While sending the request');
@@ -202,6 +175,10 @@ public with sharing class AssetManagementController {
         return ConnectApi.AssetMgmt.initiateAmendQuantity(input);
     }
 
+    /**
+     * This POJO Class is used to show on the UI
+     * Status URL and requestIdentifier are used to track the changes
+     */
     public class AssetInfo { 
         @AuraEnabled
         public Asset asset{get;set;}

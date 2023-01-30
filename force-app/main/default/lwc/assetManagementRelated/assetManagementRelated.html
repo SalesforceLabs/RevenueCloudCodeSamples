@@ -10,16 +10,16 @@
         <c-event-manager oncustevent={handleEvent}></c-event-manager>
         <div slot="actions">
             <lightning-button-group>
-                <lightning-button variant="neutral" label="Renew Assets" disabled={isButtonsActivated} name="Renew" onclick ={handleAction} data-id="Renew"></lightning-button>
-                <lightning-button variant="neutral" label="Cancel Assets" disabled={isButtonsActivated} name="CancelDatePopup" onclick ={toggleCancelDatePopup} data-id="CancelAction"></lightning-button>
-                <lightning-button variant="neutral" label="Amend Assets" disabled={isButtonsActivated} name="AmendDatePopup" onclick ={toggleAmendDatePopup} data-id="AmendAction"></lightning-button>
+                <lightning-button variant="neutral" label="Renew Assets" disabled={isToggle.isButtonsActivated} name="Renew" onclick ={handleAction} data-id="Renew"></lightning-button>
+                <lightning-button variant="neutral" label="Cancel Assets" disabled={isToggle.isButtonsActivated} name="CancelDatePopup" onclick ={toggleCancelDatePopup} data-id="CancelAction"></lightning-button>
+                <lightning-button variant="neutral" label="Amend Assets" disabled={isToggle.isButtonsActivated} name="AmendDatePopup" onclick ={toggleAmendDatePopup} data-id="AmendAction"></lightning-button>
             </lightning-button-group>
-            <template if:true={isLoaded}>
+            <template if:true={isToggle.isLoaded}>
                 <lightning-spinner alternative-text="Loading"></lightning-spinner>
             </template>         
         </div>
     </lightning-card>
-    <lightning-card if:true={isCancelDatePopup}>
+    <lightning-card if:true={isToggle.isCancelDatePopup}>
         <div class="slds-container_small">
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
@@ -41,7 +41,7 @@
         </div>
     </lightning-card>
 
-    <lightning-card if:true={isDatePopup.isAmendDatePopup}>
+    <lightning-card if:true={isToggle.isAmendDatePopup}>
         <div class="slds-container_small">
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02" aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">

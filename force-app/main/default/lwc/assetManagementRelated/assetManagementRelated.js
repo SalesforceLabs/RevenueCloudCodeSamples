@@ -4,7 +4,6 @@ import renewAssets from '@salesforce/apex/AssetManagementController.renewAssets'
 import cancelAssets from '@salesforce/apex/AssetManagementController.cancelAssets'
 import amendAssets from '@salesforce/apex/AssetManagementController.amendAssets'
 import processAsyncData from '@salesforce/apex/AssetManagementController.processAsyncData';
-import createAmendQuote from '@salesforce/apex/AssetManagementController.createAmendQuote';
 import AssetManagementLabel from '@salesforce/label/c.AssetManagement';
 
 const columns = [
@@ -67,15 +66,12 @@ export default class AssetManagement extends LightningElement {
     @track error;
     @track columns = columns;
     @track cancelledDate
-    @track amendedDate
-    @track isLoaded = false;
-    @track isDatePopup = { isCancelDatePopup: false, isButtonsActivated: true, isAmendDatePopup: false }
+    @track amendedDate;
+    @track isToggle = {isLoaded: false, isCancelDatePopup: false, isButtonsActivated: true, isAmendDatePopup: false }
     @track selectedRows = [];
     @track selectedRowsAPI = []
     @track AssetManagementLabel = AssetManagementLabel
     @api recordId
-    isButtonsActivated = true;
-    isCancelDatePopup = false;
     assetMap = new Map();
     a_Record_URL;
     asyncIdList = new Set();
@@ -89,7 +85,6 @@ export default class AssetManagement extends LightningElement {
     assets({ error, data }) {
         if (data) {
             this.assetList = this.generateTree(data)
-            console.log(this.assetMap)
         }
         else if (error) {
             this.error = error;
@@ -104,7 +99,7 @@ export default class AssetManagement extends LightningElement {
             this.assetMap.set(tempConRec.assetId, tempConRec);
         })
         let assetList = Array.from(this.assetMap.values());
-        let r = [], h = assetList.reduce((a, c) => (a[c.assetId] = c, a), {});
+        let r = [], h = assetList.reduce( (a, c) => (a[c.assetId] = (c, a)), {});
         assetList.forEach((c, i, a, e = h[c.parentId]) => {
             (e ? (e._children) : r).push(c)
         });
@@ -113,20 +108,16 @@ export default class AssetManagement extends LightningElement {
 
     handleRowSelection(event) {
         let selectedRows = event.detail.selectedRows;
-        console.log(selectedRows);
-        console.log(JSON.stringify(event));
         if (selectedRows.length > 0) {
             let tempList = [];
             selectedRows.forEach(selectedRecord => {
-                console.log('selectedRecord', selectedRecord);
-                console.log('selectedRecord', JSON.stringify(selectedRecord));
                 tempList.push(selectedRecord.assetId);
                 this.selectedRows.push(selectedRecord);
             })
 
             let assetList = Array.from(this.assetMap.values());
             assetList.forEach(asset => {
-                if (asset.parentId != undefined) {
+                if (asset.parentId !== undefined) {
 
                     if (tempList.includes(asset.parentId)) {
                         tempList.push(asset.assetId);
@@ -134,25 +125,31 @@ export default class AssetManagement extends LightningElement {
                     }
                 }
             })
-            console.log('assetList', tempList);
             this.selectedRowsAPI = tempList;
         }
 
-        this.isButtonsActivated = selectedRows.length > 0 ? false : true;
+        this.isToggle.isButtonsActivated = selectedRows.length > 0 ? false : true;
     }
 
     toggleCancelDatePopup = () => {
-        this.isCancelDatePopup = this.isCancelDatePopup === false ? true : false
+        this.isToggle.isCancelDatePopup = this.isToggle.isCancelDatePopup === false ? true : false
     }
 
     toggleAmendDatePopup = () => {
-        this.isDatePopup.isAmendDatePopup = this.isDatePopup.isAmendDatePopup === false ? true : false
+        this.isToggle.isAmendDatePopup = this.isToggle.isAmendDatePopup === false ? true : false
+    }
+
+    get toggleCancelAssetButton() {
+        return this.selectedRowsAPI.length > 0 && this.cancelledDate !== undefined ? false : true;
+    }
+
+    get toggleAmendAssetButton() {
+        return this.selectedRowsAPI.length > 0 && this.amendedDate !== undefined && this.quantity !== undefined ? false : true;
     }
 
     handleAction = event => {
         let actionType = event.currentTarget.name;
-        this.isLoaded = true;
-        console.log('actionType', actionType);
+        this.isToggle.isLoaded = true;
         if (actionType === 'Renew') {
             this.handleRenewAssets();
         }
@@ -162,11 +159,8 @@ export default class AssetManagement extends LightningElement {
         else if (actionType === 'Amend') {
             this.handleAmendAssets();
         }
-        else if (actionType === 'AmendQuote') {
-            this.handleAmendQuote();
-        }
-        this.isLoaded = false;
-        this.isCancelDatePopup = false;
+        this.isToggle.isLoaded = false;
+        this.isToggle.isCancelDatePopup = false;
     }
 
 
@@ -188,7 +182,7 @@ export default class AssetManagement extends LightningElement {
             .catch((error) => {
                 this.error = error;
             });
-        this.isCancelDatePopup = false;
+        this.isToggle.isCancelDatePopup = false;
     }
 
     handleAmendAssets = () => {
@@ -199,19 +193,7 @@ export default class AssetManagement extends LightningElement {
             .catch((error) => {
                 this.error = error;
             });
-        this.isDatePopup.isAmendDatePopup = false;
-    }
-
-    handleAmendQuote = () => {
-        
-        createAmendQuote({ assetList: this.selectedRows, amendDate: this.amendedDate, quantity: this.quantity, accountId : this.recordId})
-        .then((data) => {
-            console.log(data);
-        })
-        .catch((error) => {
-            this.error = error;
-        });
-        this.isDatePopup.isAmendDatePopup = false;
+        this.isToggle.isAmendDatePopup = false;
     }
 
     processAPIRequests = (data) => {
@@ -236,39 +218,29 @@ export default class AssetManagement extends LightningElement {
 
     handleAmendDate(event) {
         let elemId = event.currentTarget.dataset.id
-        if (elemId == 'AmendDate')
+        if (elemId === 'AmendDate')
             this.amendedDate = event.currentTarget.value;
 
-        if (elemId == 'quantity')
+        if (elemId === 'quantity')
             this.quantity = event.currentTarget.value;
-    }
-
-    get toggleCancelAssetButton() {
-        return this.selectedRowsAPI.length > 0 && this.cancelledDate !== undefined ? false : true;
-    }
-
-    get toggleAmendAssetButton() {
-        console.log(this.amendedDate);
-        console.log(this.quantity);
-        return this.selectedRowsAPI.length > 0 && this.amendedDate !== undefined && this.quantity !== undefined ? false : true;
     }
 
     handleEvent(event) {
         let obj = event.detail.data.payload;
         let data = Array.from(this.assetMap.values());
         data.forEach(asset => {
-            if (asset.requestIdentifier == obj.RequestIdentifier) {
+            if (asset.requestIdentifier === obj.RequestIdentifier) {
                 this.removeAsyncId(asset.statusURL)
                 if (obj.HasErrors) {
                     asset.Status = 'Completed With Failures';
                     asset.StatusURL = this.a_Record_URL + '/lightning/r/RevenueTransactionErrorLog/' + asset.assetId + '/related/PrimaryRevenueTransactionErrorLogs/view';
                 }
                 else {
-                    if (obj.hasOwnProperty('RenewalRecordId')) {
+                    if (Object.prototype.hasOwnProperty.call(obj, "RenewalRecordId")) {
                         asset.Status = 'Renewed';
                         asset.StatusURL = this.a_Record_URL + '/' + obj.RenewalRecordId;
                     }
-                    else if (obj.hasOwnProperty('CancellationRecordId')) {
+                    else if (Object.prototype.hasOwnProperty.call(obj, "CancellationRecordId")) {
                         asset.Status = 'Cancelled';
                         asset.StatusURL = this.a_Record_URL + '/' + obj.CancellationRecordId;
                     }
@@ -286,12 +258,11 @@ export default class AssetManagement extends LightningElement {
         processAsyncData({ assetInfoList: this.asyncIdList })
             .then((data) => {
                 let assetList = Array.from(this.assetMap.values());
-                console.log('assetList', assetList);
                 assetList.forEach(asset => {
                     let asyncObj = data.get(asset.requestIdentifier)
-                    if (asyncObj.Id == asset.requestIdentifier) {
+                    if (asyncObj.Id === asset.requestIdentifier) {
                         asset.Status = asyncObj.Status;
-                        if (asyncObj.Status != 'Submitted') {
+                        if (asyncObj.Status !== 'Submitted') {
                             this.removeAsyncId(asyncObj.Id)
                         }
                     }
@@ -306,15 +277,14 @@ export default class AssetManagement extends LightningElement {
     async poll(fn, fnCondition, ms) {
         let result = await fn;
         while (fnCondition.size > 0) {
-            await this.wait(ms);
-            result = await fn;
+            this.wait(ms);
+            result = fn;
         }
-        return result;
+        return Promise.all(result);
     }
 
     wait(ms = 500) {
         return new Promise(resolve => {
-            console.log(`waiting ${ms} ms...`);
             setTimeout(resolve, ms);
         });
     }

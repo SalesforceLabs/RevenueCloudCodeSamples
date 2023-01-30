@@ -33,8 +33,6 @@ public with sharing class AssetManagementController {
         for(AssetRelationShip ars :  [SELECT Id, AssetId,  RelatedAssetid FROM AssetRelationship where Asset.AccountId =: accountId WITH SECURITY_ENFORCED Order By AssetId]){
             assetInfoMap.get(ars.RelatedAssetid).parentId = ars.AssetId;
         }
-
-        system.debug(JSON.serialize(assetInfoMap.values()));
         return assetInfoMap.values();
     }
 
@@ -53,18 +51,16 @@ public with sharing class AssetManagementController {
         for(AssetInfo asset : assetList) {
             assetIds.add(asset.assetId);
             assetMap.put(asset.assetId, asset);
-            System.debug('<<<< asset >>>'+asset.assetId);
             if(assetIds.size() == REVCLOUDAPILIMIT){
-                response =  renewAssetsAPI(assetIds);
+                response =  AssetManagementAPIs.renewAssetsAPI(assetIds);
                 responseList = addStatusURL(assetIds, assetMap, response);
                 assetIds = new List<String>();
             }
         }
         if(!assetIds.isEmpty()){
-            response = renewAssetsAPI(assetIds);
+            response = AssetManagementAPIs.renewAssetsAPI(assetIds);
             responseList = addStatusURL(assetIds, assetMap, response);
         }
-        System.debug('<<<<< responseList >>>>'+responseList);
         return responseList.values();
     }
 
@@ -85,16 +81,15 @@ public with sharing class AssetManagementController {
             assetIds.add(asset.assetId);
             assetMap.put(asset.assetId, asset);
             if(assetIds.size() == REVCLOUDAPILIMIT){
-                response = cancelAssetsAPI(assetIds, cancelDate);
+                response = AssetManagementAPIs.cancelAssetsAPI(assetIds, cancelDate);
                 responseList = addStatusURL(assetIds, assetMap, response);
                 assetIds = new List<String>();
             }
         }
         if(!assetIds.isEmpty()){
-            response = cancelAssetsAPI(assetIds, cancelDate);
+            response = AssetManagementAPIs.cancelAssetsAPI(assetIds, cancelDate);
             responseList = addStatusURL(assetIds, assetMap, response);
         }
-        System.debug('<<<<< responseList >>>>'+responseList);
         return responseList.values();
     }
 
@@ -117,16 +112,15 @@ public with sharing class AssetManagementController {
             assetIds.add(asset.assetId);
             assetMap.put(asset.assetId, asset);
             if(assetIds.size() == REVCLOUDAPILIMIT){
-                response = amendAssetsAPI(assetIds, amendDate, quantity);
+                response = AssetManagementAPIs.amendAssetsAPI(assetIds, amendDate, quantity);
                 responseList = addStatusURL(assetIds, assetMap, response);
                 assetIds = new List<String>();
             }
         }
         if(!assetIds.isEmpty()){
-            response = amendAssetsAPI(assetIds, amendDate, quantity);
+            response = AssetManagementAPIs.amendAssetsAPI(assetIds, amendDate, quantity);
             responseList = addStatusURL(assetIds, assetMap, response);
         }
-        System.debug('<<<<< responseList >>>>'+responseList);
         return responseList.values();
     }
 
@@ -148,31 +142,6 @@ public with sharing class AssetManagementController {
             return assetMap;
         }
         throw new AuraHandledException('Error While sending the request');
-    }
-
-    public static ConnectApi.RevenueAsyncRepresentation renewAssetsAPI(List<String> assetIds){
-        ConnectApi.AssetMgmtInitiateRenewalInput input = new ConnectApi.AssetMgmtInitiateRenewalInput();
-        input.assetIds = assetIds;
-        ConnectApi.RevenueAsyncRepresentation output = ConnectApi.AssetMgmt.initiateRenewal(input);
-        System.debug(output);
-        return output;
-    }
-
-    private static ConnectApi.RevenueAsyncRepresentation cancelAssetsAPI(List<String> assetIds, Datetime cancelDate){
-        ConnectApi.AssetMgmtInitiateCancellationInput input = new ConnectApi.AssetMgmtInitiateCancellationInput();
-        input.cancellationOutputType = ConnectApi.AssetMgmtCancellationType.Order;
-        input.assetIds = assetIds;
-        input.cancellationDate = cancelDate;
-        return ConnectApi.AssetMgmt.initiateCancellation(input);
-    }
-
-    private static ConnectApi.RevenueAsyncRepresentation amendAssetsAPI(List<String> assetIds, Datetime amendDate, Integer quantity){
-        ConnectApi.AssetMgmtInitiateAmendQtyInput input = new ConnectApi.AssetMgmtInitiateAmendQtyInput();
-        input.amendmentOutputType = ConnectApi.AssetMgmtAmendmentType.Order;
-        input.assetIds = assetIds;
-        input.startDate = amendDate;
-        input.quantityChange = quantity;
-        return ConnectApi.AssetMgmt.initiateAmendQuantity(input);
     }
 
     /**

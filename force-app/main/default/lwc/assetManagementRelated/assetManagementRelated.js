@@ -207,9 +207,6 @@ export default class AssetManagement extends LightningElement {
         });
         this.columns = columnsUpdated;
         this.assetList = this.generateTree(Array.from(this.assetMap.values()));
-        
-        const fn = this.processAsyncStatus()
-        this.poll(fn, this.asyncIdList, 1000);
     }
 
     handleDate(event) {
@@ -229,18 +226,18 @@ export default class AssetManagement extends LightningElement {
         let obj = event.detail.data.payload;
         let data = Array.from(this.assetMap.values());
         data.forEach(asset => {
-            if (asset.requestIdentifier === obj.RequestIdentifier) {
+            if (asset.requestIdentifier == obj.RequestIdentifier) {
                 this.removeAsyncId(asset.statusURL)
                 if (obj.HasErrors) {
                     asset.Status = 'Completed With Failures';
                     asset.StatusURL = this.a_Record_URL + '/lightning/r/RevenueTransactionErrorLog/' + asset.assetId + '/related/PrimaryRevenueTransactionErrorLogs/view';
                 }
                 else {
-                    if (Object.prototype.hasOwnProperty.call(obj, "RenewalRecordId")) {
+                    if (obj.hasOwnProperty('RenewalRecordId')) {
                         asset.Status = 'Renewed';
                         asset.StatusURL = this.a_Record_URL + '/' + obj.RenewalRecordId;
                     }
-                    else if (Object.prototype.hasOwnProperty.call(obj, "CancellationRecordId")) {
+                    else if (obj.hasOwnProperty('CancellationRecordId')) {
                         asset.Status = 'Cancelled';
                         asset.StatusURL = this.a_Record_URL + '/' + obj.CancellationRecordId;
                     }
@@ -252,41 +249,6 @@ export default class AssetManagement extends LightningElement {
             }
         })
         this.assetList = this.generateTree(data);
-    }
-
-    processAsyncStatus() {
-        processAsyncData({ assetInfoList: this.asyncIdList })
-            .then((data) => {
-                let assetList = Array.from(this.assetMap.values());
-                assetList.forEach(asset => {
-                    let asyncObj = data.get(asset.requestIdentifier)
-                    if (asyncObj.Id === asset.requestIdentifier) {
-                        asset.Status = asyncObj.Status;
-                        if (asyncObj.Status !== 'Submitted') {
-                            this.removeAsyncId(asyncObj.Id)
-                        }
-                    }
-                })
-                this.assetList = this.generateTree(assetList);
-            })
-            .catch((error) => {
-                this.error = error;
-            });
-    }
-
-    async poll(fn, fnCondition, ms) {
-        let result = await fn;
-        while (fnCondition.size > 0) {
-            this.wait(ms);
-            result = fn;
-        }
-        return Promise.all(result);
-    }
-
-    wait(ms = 500) {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms);
-        });
     }
 
     removeAsyncId(statusURL) {

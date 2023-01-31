@@ -99,7 +99,7 @@ export default class AssetManagement extends LightningElement {
             this.assetMap.set(tempConRec.assetId, tempConRec);
         })
         let assetList = Array.from(this.assetMap.values());
-        let r = [], h = assetList.reduce( (a, c) => (a[c.assetId] = (c, a)), {});
+        let r = [], h = assetList.reduce((a, c) => (a[c.assetId] = c, a), {});
         assetList.forEach((c, i, a, e = h[c.parentId]) => {
             (e ? (e._children) : r).push(c)
         });
@@ -207,9 +207,9 @@ export default class AssetManagement extends LightningElement {
         });
         this.columns = columnsUpdated;
         this.assetList = this.generateTree(Array.from(this.assetMap.values()));
-        /*
+        
         const fn = this.processAsyncStatus()
-        this.poll(fn, this.asyncIdList, 1000);*/
+        this.poll(fn, this.asyncIdList, 1000);
     }
 
     handleDate(event) {

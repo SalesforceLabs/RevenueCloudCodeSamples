@@ -30,7 +30,7 @@ public with sharing class AssetManagementController {
 
         //If there is a bundle to show the heirarchy, for every AssetInfo parent Id is required to generate the tree here
         //Using the relation to populate the parentId to the POJO AssetInfo.
-        for(AssetRelationShip ars :  [SELECT Id, AssetId,  RelatedAssetid FROM AssetRelationship where Asset.AccountId =: accountId WITH SECURITY_ENFORCED Order By AssetId]){
+        for(AssetRelationShip ars :  [SELECT Id, AssetId,  RelatedAssetid FROM AssetRelationship where Asset.AccountId =: accountId Order By AssetId]){
             assetInfoMap.get(ars.RelatedAssetid).parentId = ars.AssetId;
         }
         return assetInfoMap.values();

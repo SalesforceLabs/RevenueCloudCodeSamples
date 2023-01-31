@@ -3,7 +3,6 @@ import getAssets from '@salesforce/apex/AssetManagementController.getAssetsByAcc
 import renewAssets from '@salesforce/apex/AssetManagementController.renewAssets'
 import cancelAssets from '@salesforce/apex/AssetManagementController.cancelAssets'
 import amendAssets from '@salesforce/apex/AssetManagementController.amendAssets'
-import processAsyncData from '@salesforce/apex/AssetManagementController.processAsyncData';
 import AssetManagementLabel from '@salesforce/label/c.AssetManagement';
 
 const columns = [
@@ -107,6 +106,7 @@ export default class AssetManagement extends LightningElement {
     }
 
     handleRowSelection(event) {
+        this.selectedRows = [];
         let selectedRows = event.detail.selectedRows;
         if (selectedRows.length > 0) {
             let tempList = [];

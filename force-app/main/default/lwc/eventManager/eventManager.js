@@ -1,21 +1,22 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { subscribe, unsubscribe}  from 'lightning/empApi';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import currentUserId from '@salesforce/user/Id';
-import { CurrentPageReference } from 'lightning/navigation';
 
 export default class EventManager extends LightningElement {
 
     cancelSubscription = {};
     renewSubscription = {};
+    amendSubscription = {};
      @api cancelChannel = '/event/AssetCancelInitiatedEvent';
      @api renewChannel = '/event/AssetRenewInitiatedEvent';
+     @api amendChannel = '/event/AssetAmendInitiatedEvent';
 
     // Initializes the component
     connectedCallback() {
         // Register listener
         this.handleRenewSubscribe();
         this.handleCancelSubscribe();
+        this.handleAmendSubscribe();
     }
 
     disconnectedCallback() {
@@ -28,20 +29,8 @@ export default class EventManager extends LightningElement {
         const messageCallback = function(response) {
             let obj = JSON.parse(JSON.stringify(response));
             if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all events
-                let message = 'Order created: ' + obj.data.payload.CancellationRecordId;
-
-                let variant = 'success'
-                if (obj.data.payload.AssetCancelErrorDetailEvents != null) {
-                    message = 'Couldn’t cancel the asset: ' + obj.data.payload.AssetCancelErrorDetailEvents[0].ErrorMessage;
-                    variant = 'error'
-                }
-                const evt = new ShowToastEvent({
-                    message: message,
-                    variant: variant,
-                    mode : "sticky"
-                });
-
-                thisReference.dispatchEvent(evt);
+                
+                thisReference.dispatchEvent(new CustomEvent('custevent', { detail: obj }));
             }
             // Response contains the payload of the new message received
         };
@@ -62,20 +51,8 @@ export default class EventManager extends LightningElement {
             let obj = JSON.parse(JSON.stringify(response));
             
             if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all events
-
-                let message = 'Order created: ' + obj.data.payload.RenewalRecordId;
-                let variant = 'success'
-                if (obj.data.payload.AssetRenewErrorDetailEvents != null) {
-                    message = 'Couldn’t renew the asset: ' + obj.data.payload.AssetRenewErrorDetailEvents[0].ErrorMessage;
-                    variant = 'error'
-                }
-                const evt = new ShowToastEvent({
-                    message: message,
-                    variant: variant,
-                    mode : "sticky"
-                });
-
-                thisReference.dispatchEvent(evt);
+                
+                thisReference.dispatchEvent(new CustomEvent('custevent', { detail: obj }));
             }
             // Response contains the payload of the new message received
         };
@@ -85,11 +62,32 @@ export default class EventManager extends LightningElement {
             this.renewSubscription = response;
         });
     }
+
+    handleAmendSubscribe = () => {
+        // Callback invoked whenever a new event message is received
+        const thisReference = this;
+        const messageCallback = function(response) {
+            let obj = JSON.parse(JSON.stringify(response));
+            
+            if(currentUserId === obj.data.payload.CreatedById){ //dispatch the users events instead of all 
+
+                thisReference.dispatchEvent(new CustomEvent('custevent', { detail: obj }));
+            }
+            // Response contains the payload of the new message received
+        };
+
+        subscribe(this.amendChannel, -1, messageCallback).then(response => {
+            // Response contains the subscription information on renew call
+            this.amendSubscription = response;
+        });
+    }
     
     unsubscribeEvents() {
         unsubscribe(this.renewSubscription);
         unsubscribe(this.cancelSubscription);
+        unsubscribe(this.amendSubscription);
         this.cancelSubscription = null;
         this.renewSubscription = null;
+        this.amendSubscription = null;
     }
 }

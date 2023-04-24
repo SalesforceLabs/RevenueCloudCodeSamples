@@ -35,24 +35,36 @@ public with sharing class AssetManagementControllerTest {
     @isTest static void testRenewAsset() {
         makeData();
         
-        List<Asset> assetList = [Select Id from Asset limit 1];
+        List<Asset> assetList = [Select Id, Name from Asset limit 1];
         System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
-        List<String> responseList;
+        List<AssetManagementController.AssetInfo> responseList;
         if(!assetList.isEmpty()){
-            responseList = AssetManagementController.renewAssets(assetList);
-            System.assertEquals(1, responseList.size());
+            responseList = AssetManagementController.renewAssets(makeAssetInfo(assetList));
+            System.assertEquals(1, responseList.size(), 'Response size should be 1');
         }
     }
     
     @IsTest static void testCancelAsset() {
         makeData();
         
-        List<Asset> assetList = [Select Id from Asset limit 1];
+        List<Asset> assetList = [Select Id, Name from Asset limit 1];
         System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
-        List<String> responseList;
+        List<AssetManagementController.AssetInfo> responseList;
         if(!assetList.isEmpty()){
-            responseList = AssetManagementController.cancelAssets(assetList, system.today());
-            System.assertEquals(1, responseList.size());
+            responseList = AssetManagementController.cancelAssets(makeAssetInfo(assetList), system.today());
+            System.assertEquals(1, responseList.size(), 'Response size should be 1');
+        }
+    }
+
+    @IsTest static void testAmendAsset() {
+        makeData();
+        
+        List<Asset> assetList = [Select Id, Name from Asset limit 1];
+        System.assertEquals(assetList.size(), 1, 'Asset size should be 1');
+        List<AssetManagementController.AssetInfo> responseList;
+        if(!assetList.isEmpty()){
+            responseList = AssetManagementController.amendAssets(makeAssetInfo(assetList), system.today(), 5);
+            System.assertEquals(1, responseList.size(), 'Response size should be 1');
         }
     }
     
@@ -62,7 +74,18 @@ public with sharing class AssetManagementControllerTest {
         Id accountId = [Select Id from Account limit 1].Id;
         System.assertNotEquals(accountId, null, 'Account should not be null');
         
-        List<Asset> assetList = AssetManagementController.getAssetsByAccount(accountId);
+        List<AssetManagementController.AssetInfo> assetList = AssetManagementController.getAssetsByAccount(accountId);
         System.assertNotEquals(assetList.size(), null, 'asset are not retrived');
-    }   
+    }
+
+    private static List<AssetManagementController.AssetInfo> makeAssetInfo(List<Asset> assetsList) {
+        List<AssetManagementController.AssetInfo> assetInfoList = new List<AssetManagementController.AssetInfo>();
+        for(Asset a : assetsList) {
+            AssetManagementController.AssetInfo info = new AssetManagementController.AssetInfo();
+            info.assetId = a.Id;
+            info.Name = a.Name;
+            assetInfoList.add(info);
+        }
+        return assetInfoList;
+    }
 }

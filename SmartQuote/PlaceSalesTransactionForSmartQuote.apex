@@ -31,11 +31,9 @@ public class PlaceSalesTransactionForSmartQuote {
         // get Opportunity Id from request
         String opportunityId = request.opportunityId;
         String str = request.searchProductsRepresentationJson.trim();
-        System.debug('Check String ' + str.right(1));
         if (str.right(1) != ']') {
             str = str + ']';
         }
-        System.debug('Check String ' + str.right(5));
         
         // Get the SearchProductsRepresentations from PCM
         List<runtime_industries_cpq.SearchProductsRepresentation> searchProductsRepresentations = (List<runtime_industries_cpq.SearchProductsRepresentation>) JSON.deserialize(str, List<runtime_industries_cpq.SearchProductsRepresentation>.class);

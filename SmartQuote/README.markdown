@@ -30,11 +30,13 @@ sf org login web --alias targetOrg --instance-url https://{Current My Domain URL
 ## 6. Deploy to the Target Org
 Log in to your Salesforce target org using the following command:
 ```bash
-sf org login web --alias targetOrg --instance-url https://{Current My Domain URL}
+sf project deploy start --metadata-dir "pathToSmartQuoteCreationFolder" --target-org targetOrg
 ```
 Replace `pathToSmartQuoteCreationFolder` with the path to the `SmartQuoteCreation` folder on your local machine.
 
 ## 7. Execute Smart Quote Creation Topic
 Log in to your Salesforce target org
+
 Go to setup -> Agent
+
 Add Smart Quote Creation topic to default agent.

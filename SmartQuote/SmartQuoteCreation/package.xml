@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SmartQuoteCreation</fullName>
+    <types>
+        <members>GetMostRelevantProduct</members>
+        <members>ParseProductMentionsJson</members>
+        <members>ParseSearchProductRepresentationJson</members>
+        <members>ProductMentionsClassDescriptor</members>
+        <members>SerializeSearchProductsRepresentation</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>Create_Quote_from_Products</members>
+        <members>Get_Products_from_Product_Mentions</members>
+        <members>Get_Video_Call_Records</members>
+        <name>Flow</name>
+    </types>
+    <types>
+        <members>Create_Quote_from_Products</members>
+        <members>Get_Products_from_Product_Mentions</members>
+        <members>Get_Video_Call_Records</members>
+        <name>GenAiFunction</name>
+    </types>
+    <types>
+        <members>Smart_Quote_Creation</members>
+        <name>GenAiPlugin</name>
+    </types>
+    <version>63.0</version>
+</Package>

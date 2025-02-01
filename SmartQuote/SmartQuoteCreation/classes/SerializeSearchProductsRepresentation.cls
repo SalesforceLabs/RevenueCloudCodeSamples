@@ -13,7 +13,7 @@ public class SerializeSearchProductsRepresentation {
     
     @InvocableMethod(label='doSerialization' description='doSerialization')
     public static List<Result> doSerialization(List<Request> requestList) {
-        List<runtime_industries_cpq.SearchProductsRepresentation> searchProductsRepresentation = requestList.get(0).searchProductsRepresentation;
+    	List<runtime_industries_cpq.SearchProductsRepresentation> searchProductsRepresentation = requestList.get(0).searchProductsRepresentation;
                 
         List<Result> results = new List<Result>();
         Result result = new Result();

@@ -35,8 +35,38 @@ sf project deploy start --metadata-dir "pathToSmartQuoteCreationFolder" --target
 Replace `pathToSmartQuoteCreationFolder` with the path to the `SmartQuoteCreation` folder on your local machine.
 
 ## 7. Execute Smart Quote Creation Topic
-Log in to your Salesforce target org
 
-Go to setup -> Agent
+The Topic metadata is treated as a Standard Topic. When adding the Topic to the agent, an error is returned.
 
-Add Smart Quote Creation topic to default agent.
+### Workaround:
+Manually create a new Topic with the following details:
+
+- **Topic Label**: Smart Quote Creation New
+- **Topic API Name**: Smart_Quote_Creation_New
+- **Classification Description**: Interacts with the user to create a quote from the conversation transcript.
+
+### Scope:
+1. Your job is to create a quote from the conversation transcript.
+2. The first agent action is **Get Video Call Records**.
+3. The second agent action is **Get Products from Product Mentions**.
+4. The last agent action is **Create Quote from Products**.
+
+### Instructions:
+
+- **Instruction 1**:  
+  When a user wants to create a quote from a conversation or transcript, the agent action **Get Video Call Records** will be triggered. The input for this action is the **Opportunity ID**. If you do not know the Opportunity ID, ask the user for it. If the page context has an Opportunity, use that ID as the action input.
+
+- **Instruction 2**:  
+  The outputs of the agent action **Get Products from Product Mentions** are:
+  - **ProductsOutput**: A list of Product2 records.
+  - **QuoteLineItemsOutput**: A list of QuoteLineItem records.
+
+  **QuoteLineItemsOutput** will be used as the input for the **Create Quote from Products** action.
+
+- **Instruction 3**:  
+  Afterward, the agent action **Create Quote from Products** will be triggered. The **Opportunity ID** and **QuoteLineItemsOutput** will be used as inputs for this action.
+
+### Example User Inputs:
+1. "Create quote from conversation."
+2. "Create smart quote."
+3. "I want to create a quote from conversation."

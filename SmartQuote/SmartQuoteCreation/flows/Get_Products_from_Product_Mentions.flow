@@ -3,7 +3,7 @@
     <actionCalls>
         <name>Find_Products_for_Each_Mention</name>
         <label>Find Products for Each Mention</label>
-        <locationX>396</locationX>
+        <locationX>748</locationX>
         <locationY>458</locationY>
         <actionName>findProducts</actionName>
         <actionType>findProducts</actionType>
@@ -18,33 +18,6 @@
             </value>
         </inputParameters>
         <nameSegment>findProducts</nameSegment>
-        <offset>0</offset>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </actionCalls>
-    <actionCalls>
-        <name>Get_Most_Revelant_Product</name>
-        <label>Get Most Revelant Product</label>
-        <locationX>264</locationX>
-        <locationY>674</locationY>
-        <actionName>GetMostRelevantProduct</actionName>
-        <actionType>apex</actionType>
-        <connector>
-            <targetReference>Collect_Products_and_SearchProductsRepresentations</targetReference>
-        </connector>
-        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
-        <inputParameters>
-            <name>productMention</name>
-            <value>
-                <elementReference>Loop_Parsed_Product_Mentions</elementReference>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>searchProductsRepresentations</name>
-            <value>
-                <elementReference>Find_Products_for_Each_Mention.results</elementReference>
-            </value>
-        </inputParameters>
-        <nameSegment>GetMostRelevantProduct</nameSegment>
         <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
@@ -106,7 +79,7 @@
         <name>Serialize_SearchProductsRepresentations</name>
         <label>Serialize SearchProductsRepresentations</label>
         <locationX>176</locationX>
-        <locationY>1058</locationY>
+        <locationY>1766</locationY>
         <actionName>SerializeSearchProductsRepresentation</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -126,32 +99,113 @@
     <apiVersion>63.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
-        <name>Collect_Products_and_SearchProductsRepresentations</name>
-        <label>Collect Products and SearchProductsRepresentations</label>
-        <locationX>264</locationX>
-        <locationY>782</locationY>
+        <name>Assign_LoopIndex_Zero</name>
+        <label>Assign LoopIndex Zero</label>
+        <locationX>616</locationX>
+        <locationY>674</locationY>
+        <assignmentItems>
+            <assignToReference>LoopIndex</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <numberValue>0.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Products_for_Each_Product_Mention</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Products_to_ProductsOutput</name>
+        <label>Assign Products to ProductsOutput</label>
+        <locationX>176</locationX>
+        <locationY>1658</locationY>
         <assignmentItems>
             <assignToReference>ProductsOutput</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Products</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Serialize_SearchProductsRepresentations</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Collect_ProductIds_and_SearchProductsRepresentations</name>
+        <label>Collect ProductIds and SearchProductsRepresentations</label>
+        <locationX>704</locationX>
+        <locationY>998</locationY>
+        <assignmentItems>
+            <assignToReference>ProductIds</assignToReference>
             <operator>Add</operator>
             <value>
-                <elementReference>Get_Most_Revelant_Product.product</elementReference>
+                <elementReference>Loop_Products_for_Each_Product_Mention.id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>Loop_Products_for_Each_Product_Mention.description</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Parsed_Product_Mentions.quantity</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>SearchProductsRepresentations</assignToReference>
             <operator>Add</operator>
             <value>
-                <elementReference>Get_Most_Revelant_Product.searchProductsRepresentation</elementReference>
+                <elementReference>Loop_Products_for_Each_Product_Mention</elementReference>
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>Loop_Parsed_Product_Mentions</targetReference>
+            <targetReference>LoopIndex_Plus_Plus</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>LoopIndex_Plus_Plus</name>
+        <label>LoopIndex Plus Plus</label>
+        <locationX>704</locationX>
+        <locationY>1106</locationY>
+        <assignmentItems>
+            <assignToReference>LoopIndex</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <numberValue>1.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Products_for_Each_Product_Mention</targetReference>
         </connector>
     </assignments>
     <decisions>
+        <name>Check_LoopIndex</name>
+        <label>Check LoopIndex</label>
+        <locationX>836</locationX>
+        <locationY>890</locationY>
+        <defaultConnector>
+            <isGoTo>true</isGoTo>
+            <targetReference>Loop_Parsed_Product_Mentions</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>LoopIndex is Not Zero</defaultConnectorLabel>
+        <rules>
+            <name>LoopInde_is_Zero</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>LoopIndex</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <numberValue>0.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Collect_ProductIds_and_SearchProductsRepresentations</targetReference>
+            </connector>
+            <label>LoopInde is Zero</label>
+        </rules>
+    </decisions>
+    <decisions>
         <name>Check_Products</name>
         <label>Check Products</label>
-        <locationX>396</locationX>
+        <locationX>748</locationX>
         <locationY>566</locationY>
         <defaultConnector>
             <targetReference>Loop_Parsed_Product_Mentions</targetReference>
@@ -168,7 +222,7 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Get_Most_Revelant_Product</targetReference>
+                <targetReference>Assign_LoopIndex_Zero</targetReference>
             </connector>
             <label>Check Products is not Empty</label>
         </rules>
@@ -187,7 +241,21 @@
             <targetReference>Find_Products_for_Each_Mention</targetReference>
         </nextValueConnector>
         <noMoreValuesConnector>
-            <targetReference>Serialize_SearchProductsRepresentations</targetReference>
+            <targetReference>Get_Products</targetReference>
+        </noMoreValuesConnector>
+    </loops>
+    <loops>
+        <name>Loop_Products_for_Each_Product_Mention</name>
+        <label>Loop Products for Each Product Mention</label>
+        <locationX>616</locationX>
+        <locationY>782</locationY>
+        <collectionReference>Find_Products_for_Each_Mention.results</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Check_LoopIndex</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Loop_Parsed_Product_Mentions</targetReference>
         </noMoreValuesConnector>
     </loops>
     <processMetadataValues>
@@ -209,6 +277,27 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Products</name>
+        <label>Get Products</label>
+        <locationX>176</locationX>
+        <locationY>1550</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Assign_Products_to_ProductsOutput</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>In</operator>
+            <value>
+                <elementReference>ProductIds</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Product2</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
@@ -217,6 +306,17 @@
         </connector>
     </start>
     <status>Active</status>
+    <variables>
+        <name>LoopIndex</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+        <value>
+            <numberValue>0.0</numberValue>
+        </value>
+    </variables>
     <variables>
         <name>ProductIds</name>
         <dataType>String</dataType>

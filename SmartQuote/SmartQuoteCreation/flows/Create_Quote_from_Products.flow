@@ -5,7 +5,7 @@
         <name>Create_Quote_and_QuoteLineItems</name>
         <label>Create Quote and QuoteLineItems</label>
         <locationX>226</locationX>
-        <locationY>2432</locationY>
+        <locationY>2948</locationY>
         <actionName>placeSalesTransaction</actionName>
         <actionType>placeSalesTransaction</actionType>
         <connector>
@@ -46,6 +46,43 @@
     <apiVersion>63.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
+        <name>Add_QLIReference_to_Graph</name>
+        <label>Add QLIReference to Graph</label>
+        <locationX>798</locationX>
+        <locationY>2648</locationY>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.type</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>QuoteLineItem</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.method</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>POST</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.referenceId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>QLIReferenceId</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>PSTGraph.records</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>QLIReference</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>QLIIndex_Plus_Plus</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>Assign_LoopPriceIndex_Zero</name>
         <label>Assign LoopPricesIndex Zero</label>
         <locationX>666</locationX>
@@ -82,7 +119,7 @@
         <name>Collect_Quote</name>
         <label>Collect Quote</label>
         <locationX>226</locationX>
-        <locationY>2648</locationY>
+        <locationY>3164</locationY>
         <assignmentItems>
             <assignToReference>QuoteOutput</assignToReference>
             <operator>Assign</operator>
@@ -202,36 +239,8 @@
                 <elementReference>QLIUnitPriceWrapper</elementReference>
             </value>
         </assignmentItems>
-        <assignmentItems>
-            <assignToReference>QLIReference.record.type</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <stringValue>QuoteLineItem</stringValue>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>QLIReference.record.method</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <stringValue>POST</stringValue>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>QLIReference.referenceId</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <stringValue>refQuoteLineItem</stringValue>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>PSTGraph.records</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <elementReference>QLIReference</elementReference>
-            </value>
-        </assignmentItems>
         <connector>
-            <targetReference>Loop_SearchProductsRepresentations</targetReference>
+            <targetReference>Check_TermDefined_Product</targetReference>
         </connector>
     </assignments>
     <assignments>
@@ -343,6 +352,99 @@
         </connector>
     </assignments>
     <assignments>
+        <name>Fields_for_Term_Defined_Product</name>
+        <label>Fields for Term Defined Product</label>
+        <locationX>666</locationX>
+        <locationY>2456</locationY>
+        <assignmentItems>
+            <assignToReference>QLIStartDateWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>StartDate</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIStartDateWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>QLIStartDate</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLISubscriptionTerm.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>SubscriptionTerm</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLISubscriptionTerm.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>1</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIPeriodBoundaryWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>PeriodBoundary</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIPeriodBoundaryWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Anniversary</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLISubscriptionTermUnitWrapper.key</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>SubscriptionTermUnit</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLISubscriptionTermUnitWrapper.obj</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>QLIPrice.pricingModel.frequency</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.fieldValues</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>QLIStartDateWrapper</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.fieldValues</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>QLISubscriptionTerm</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.fieldValues</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>QLIPeriodBoundaryWrapper</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>QLIReference.record.fieldValues</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>QLISubscriptionTermUnitWrapper</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Add_QLIReference_to_Graph</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>Get_Default_Price</name>
         <label>Get Default Price</label>
         <locationX>798</locationX>
@@ -360,7 +462,7 @@
     </assignments>
     <assignments>
         <name>Get_First_Price</name>
-        <label>Get First Price</label>
+        <label>QLIp</label>
         <locationX>754</locationX>
         <locationY>1772</locationY>
         <assignmentItems>
@@ -389,6 +491,22 @@
         </assignmentItems>
         <connector>
             <targetReference>Loop_Prices</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>QLIIndex_Plus_Plus</name>
+        <label>QLIIndex Plus Plus</label>
+        <locationX>798</locationX>
+        <locationY>2756</locationY>
+        <assignmentItems>
+            <assignToReference>QLIIndex</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <numberValue>1.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_SearchProductsRepresentations</targetReference>
         </connector>
     </assignments>
     <collectionProcessors>
@@ -465,6 +583,31 @@
         </rules>
     </decisions>
     <decisions>
+        <name>Check_TermDefined_Product</name>
+        <label>Check TermDefined Product</label>
+        <locationX>798</locationX>
+        <locationY>2348</locationY>
+        <defaultConnector>
+            <targetReference>Add_QLIReference_to_Graph</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Not TermDefined Product</defaultConnectorLabel>
+        <rules>
+            <name>TermDefined_Product</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>QLIPrice.pricingModel.pricingModelType</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>TermDefined</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Fields_for_Term_Defined_Product</targetReference>
+            </connector>
+            <label>TermDefined Product</label>
+        </rules>
+    </decisions>
+    <decisions>
         <description>Get Appropriate Pricebook</description>
         <name>Get_Appropriate_Pricebook</name>
         <label>Get Appropriate Pricebook</label>
@@ -531,6 +674,16 @@
         </rules>
     </decisions>
     <environments>Default</environments>
+    <formulas>
+        <name>QLIReferenceId</name>
+        <dataType>String</dataType>
+        <expression>&quot;refQuoteLineItem&quot; + TEXT({!QLIIndex})</expression>
+    </formulas>
+    <formulas>
+        <name>QLIStartDate</name>
+        <dataType>String</dataType>
+        <expression>TEXT(Year({!$Flow.CurrentDate})) + &quot;-&quot; + TEXT(Month({!$Flow.CurrentDate})) + &quot;-&quot; + TEXT(Day({!$Flow.CurrentDate}))</expression>
+    </formulas>
     <interviewLabel>Create Quote from Products {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Create Quote from Products</label>
     <loops>
@@ -608,7 +761,7 @@
         <name>Get_Quote_Record</name>
         <label>Get Quote Record</label>
         <locationX>226</locationX>
-        <locationY>2540</locationY>
+        <locationY>3056</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Collect_Quote</targetReference>
@@ -697,6 +850,25 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
+        <name>QLIIndex</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+        <value>
+            <numberValue>0.0</numberValue>
+        </value>
+    </variables>
+    <variables>
+        <name>QLIPeriodBoundaryWrapper</name>
+        <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
         <name>QLIPrice</name>
         <apexClass>runtime_industries_cpq__ProductPricesOutputRepresentation</apexClass>
         <dataType>Apex</dataType>
@@ -739,6 +911,30 @@
     <variables>
         <name>QLIReference</name>
         <apexClass>RevSalesTrxn__RecordReference</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>QLIStartDateWrapper</name>
+        <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>QLISubscriptionTerm</name>
+        <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
+        <dataType>Apex</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>QLISubscriptionTermUnitWrapper</name>
+        <apexClass>RevSalesTrxn__RecordMapWrapper</apexClass>
         <dataType>Apex</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>

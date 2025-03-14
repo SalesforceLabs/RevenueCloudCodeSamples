@@ -29,7 +29,7 @@ sf project deploy start --metadata-dir "pathToAgentforceQuotingFolder" --target-
 ```
 Replace `pathToAgentforceQuotingFolder` with the path to the `Agentforce Quoting` folder on your local machine.
 
-## 7. Execute Smart Quote Creation Topic
+## 7. Execute Quoting Management Topic
 
 The Topic metadata is treated as a Standard Topic and added to the Einstein agent
 

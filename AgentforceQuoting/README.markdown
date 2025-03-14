@@ -1,4 +1,4 @@
-# Salesforce Quoting AI agent Deployment Instructions
+# Salesforce Agentforce Quoting agent Deployment Instructions
 
 Follow these steps to ensure proper setup and deployment of the Salesforce project.
 
@@ -7,8 +7,8 @@ Before proceeding with the deployment, make sure the organization has enabled th
 - **RLM** (Revenue Lifecycle Management)
 - **Einstein** (Einstein Analytics)
 
-## 3. Download the QuotingAI Folder
-Make sure to download the `QuotingAI` folder to your local environment, as this will be required for deployment.
+## 3. Download the Agentforce Quoting Folder
+Make sure to download the `Agentforce Quoting` folder to your local environment, as this will be required for deployment.
 
 ## 4. Install Salesforce CLI
 To interact with your Salesforce org, you need to install the Salesforce CLI.
@@ -25,9 +25,9 @@ FYI, the Current My Domain URL can be found on your org under Setup > My Domain
 ## 6. Deploy to the Target Org
 Log in to your Salesforce target org using the following command:
 ```bash
-sf project deploy start --metadata-dir "pathToQuotingAIFolder" --target-org targetOrg
+sf project deploy start --metadata-dir "pathToAgentforceQuotingFolder" --target-org targetOrg
 ```
-Replace `pathToQuotingAIFolder` with the path to the `QuotingAI` folder on your local machine.
+Replace `pathToAgentforceQuotingFolder` with the path to the `Agentforce Quoting` folder on your local machine.
 
 ## 7. Execute Smart Quote Creation Topic
 

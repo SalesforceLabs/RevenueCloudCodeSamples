@@ -1,6 +1,6 @@
-# Salesforce Agentforce Quoting agent Deployment Instructions
+# Salesforce Agentforce Quoting Agent Setup Instructions
 
-Follow these steps to ensure proper setup and deployment of the Salesforce project.
+Follow these steps to set up and use the Agentforce Quoting early adopter program.
 
 ## 1. Ensure the Org has Enabled RLM, Einstein
 Before proceeding with the deployment, make sure the organization has enabled the following features:
@@ -8,10 +8,10 @@ Before proceeding with the deployment, make sure the organization has enabled th
 - **Einstein** (Einstein Analytics)
 
 ## 3. Download the Agentforce Quoting Folder
-Make sure to download the `Agentforce Quoting` folder to your local environment, as this will be required for deployment.
+Download the `Agentforce Quoting` folder to your local environment.
 
 ## 4. Install Salesforce CLI
-To interact with your Salesforce org, you need to install the Salesforce CLI.
+Install the Salesforce CLI so you can interact with your Salesforce org.
 
 Follow the installation guide here: [Salesforce CLI Installation](https://developer.salesforce.com/tools/salesforcecli).
 
@@ -20,7 +20,7 @@ Log in to your Salesforce target org using the following command:
 ```bash
 sf org login web --alias targetOrg --instance-url https://{Current My Domain URL}
 ```
-FYI, the Current My Domain URL can be found on your org under Setup > My Domain
+You can find the Current My Domain URL for your org by going to Setup > My Domain.
 
 ## 6. Deploy to the Target Org
 Log in to your Salesforce target org using the following command:
@@ -31,7 +31,7 @@ Replace `pathToAgentforceQuotingFolder` with the path to the `Agentforce Quoting
 
 ## 7. Execute Quote Management Topic
 
-The Topic metadata is treated as a Standard Topic and added to the Einstein agent
+The Topic metadata is treated as a Standard Topic and is added to the Einstein agent.
 
 
 ### Scope:

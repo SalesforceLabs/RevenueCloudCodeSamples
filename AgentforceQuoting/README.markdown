@@ -5,7 +5,7 @@ Follow these steps to set up and use the Agentforce Quoting early adopter progra
 ## 1. Ensure the Org has Enabled RLM, Einstein
 Before proceeding with the deployment, make sure the organization has enabled the following features:
 - **RLM** (Revenue Lifecycle Management)
-- **Einstein** (Einstein Analytics)
+- **Einstein** 
 
 ## 3. Download the Agentforce Quoting Folder
 Download the `Agentforce Quoting` folder to your local environment.

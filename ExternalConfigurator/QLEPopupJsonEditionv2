@@ -1,0 +1,316 @@
+public with sharing class QLEPopupJsonEditionv2 {
+    public String jsonOutput{get;set;}
+    public String originaljsonInput{get;set;}
+    private String masterProduct{get;set;}
+    private Map<String,String> product_to_Options{get;set;}
+    public List<wrapConfiguration> wrapConfigs{get;set;}
+    private Map<String,List<wrapConfiguration>> feature_to_config{get;set;}
+    private Map<String,String> option_to_featureName{get;set;}
+    private Map<String,Integer> indexMap{get;set;}
+    private Map<String,String> productCode_to_id{get;set;}
+    private Map<String,String> fieldMapping{get;set;}  //This will be populated by a table/custom metadata the configuration will then ingest
+
+    public QLEPopupJsonEditionv2(){
+    
+    }
+    
+        //Process Pulls in the JSON from EasyXDM and begin the configuration Process
+   public PageReference jsonProcess(){
+    //initialize all maps/lists
+    fieldMapping=new Map<String,String>();
+    fieldMapping.put('Resource_zz','Config1');
+    
+
+        productCode_to_id= new Map<String,String>();
+        wrapConfigs=new List<wrapConfiguration>();
+        option_to_featureName=new Map<String,String>();
+        feature_to_config=new Map<String,List<wrapConfiguration>>();
+        indexMap = new Map<String,Integer>();
+
+        system.debug(originaljsonInput);
+
+        originaljsonInput = originaljsonInput.replace('__c', '_zz');  //Replace because variable names cannot have __ scores
+        Map<String,Object> root = (Map<String,Object>)JSON.deserializeUntyped(originaljsonInput);
+        system.debug('JSON Passed');
+        system.debug(root);
+ 
+            //IMPORTANT - This is the Drill down to walk through the JSON Strucutre from CPQ to dig into the product and configuration to handle the new and round trips
+            Map<String,Object> rootProduct = (Map<String,Object>)root.get('product');
+            system.debug('Root Product');
+            system.debug(rootProduct);
+            masterProduct = (String)rootProduct.get('configuredProductId');
+            createOptionProductMap(masterProduct);
+            Map<String,Object> OptionConfigs=(Map<String,Object>)rootProduct.get('optionConfigurations');
+
+
+            for(String s:OptionConfigs.keySet()){
+                system.debug('Option Config/Feature Names:');
+                system.debug(s);
+                List<Object> Features = (List<Object>)OptionConfigs.get(s);
+                for(Object optionMap:Features){
+                    Map<String, Object> productDetails = (Map<String, Object>)optionMap;
+                    system.debug(productDetails);
+                    //Create Wrapper Class Vars
+            
+                    Boolean wrapselected=(Boolean)productDetails.get('selected');
+
+                    if(wrapselected==true){
+                        String wrapoptionId=(String)productDetails.get('optionId');
+                        String wrapProductId=(String)productDetails.get('productId');
+                        Integer wrapQuantity=(Integer)productDetails.get('Quantity');
+                        Integer wrapindex=(Integer)productDetails.get('index');
+                        String wrapProductCode = (String)productdetails.get('ProductCode');
+                        String config1='';
+                        String config2='';
+                        
+                        if(wrapProductCode!=null){
+                            wrapProductId = productCode_to_id.get(wrapProductCode);
+                        }
+                        
+                        Map<String,Object> readonlyMap= new Map<String,Object>();
+                        Map<String,Object> lineDetails= new Map<String,Object>();
+                        //System.debug(productDetails.get('readOnly'));
+                        if(productDetails.get('readOnly')!=null){
+                            readonlyMap=(Map<String,Object>)productDetails.get('readOnly');
+                            lineDetails = (Map<String, Object>)readOnlyMap.get('line');
+                            if(lineDetails!=null){
+                                for(String ss:fieldMapping.keySet()){
+                                    config1 = (String)lineDetails.get(ss); 
+                                }
+                            
+                                if(wrapProductId==null){
+                                    wrapProductId = (String)lineDetails.get('SBQQ__Product_zz'); 
+                                }
+                            
+                            }
+                            
+                        }
+                        wrapConfiguration w=new wrapConfiguration(wrapoptionId,wrapselected,wrapProductId,wrapQuantity,wrapindex,readonlyMap, config1, config2);
+                        wrapConfigs.add(w);
+
+                        if(indexMap.containsKey(wrapProductId)){
+                            Integer tempI = indexMap.get(wrapProductId);
+                            if(tempI < wrapindex){
+                                indexMap.put(wrapProductId,wrapindex);
+                            }
+                        }else{
+                            indexMap.put(wrapProductId,wrapindex);
+                        }
+                    }
+                    
+                    
+                }
+                
+            }
+
+         String serializedList2 = JSON.serialize(wrapConfigs);
+         system.debug('Returned JSON');
+         system.debug(serializedList2);
+
+    return null;
+}
+
+    public Class wrapConfiguration{
+            public String optionId{get;set;}
+            public Boolean selected{get;set;}
+            public String productId{get;set;}
+            public Integer Quantity{get;set;}
+            public Integer index {get;set;}
+            public String config1{get;set;}
+            public String config2{get;set;}
+            public Boolean isEditable{get;set;}
+            public configData configurationData{get;set;}
+            public Map<String,Object> readOnly {get;set;}
+            
+
+            public wrapConfiguration (String optionId, Boolean selected, String productId, Integer Quantity, Integer index, Map<String,Object> readOnly,  String config1, String config2) {
+                this.optionId=optionId;
+                this.selected=selected;
+                this.productId=productId;
+                this.Quantity=Quantity;
+                this.index=index;
+                this.readOnly= readOnly;
+                this.config1=config1;   //This is a attribute that the code is updating    
+                this.config2=config2;   //This is a attribute that the code is updating   
+                this.configurationData=new configData(config1, config2);
+            }
+
+            public wrapConfiguration(){
+                    index=1000;
+                    Quantity=1;
+                    selected=true;
+                    isEditable=true;
+            }
+    }
+
+    public Class configData{
+        public String Config1{get;set;}    //Name has to match the field name on the quote line and product Option, defaulting to String
+        public String Config2{get;set;}    //Name has to match the field name on the quote line and product Option, defaulting to String
+        public configData(String config1, String config2){
+            this.Config1=config1;
+            this.Config2 = config2;
+        }
+    }
+    
+
+
+    
+    //Required!!!  Generates Maps for Options, Names, Products based on the Parent/Header Product
+       public void createOptionProductMap(ID masteProductId){
+            product_to_Options=new Map<String,String>();    
+            option_to_featureName=new Map<String,String>();
+        
+            for(SBQQ__ProductOption__c options:[Select id, SBQQ__OptionalSKU__c,SBQQ__OptionalSKU__r.ProductCode, SBQQ__Feature__c,SBQQ__Feature__r.Name from SBQQ__ProductOption__c where SBQQ__ConfiguredSKU__c =: masteProductId]){
+                    product_to_Options.put(options.SBQQ__OptionalSKU__c, options.id);
+                    option_to_featureName.put(options.id, options.SBQQ__Feature__r.Name);
+                    productCode_to_id.put(options.SBQQ__OptionalSKU__r.ProductCode, options.SBQQ__OptionalSKU__c);
+                }
+    }
+
+
+  
+
+
+
+   public PageReference confirmChanges(){
+    
+    //Loop the wrapConfiguration List and place in feature_to_config Map
+    Integer i=0;
+    for(wrapconfiguration w:wrapConfigs){
+        List<wrapConfiguration> tempList= new List<wrapConfiguration>();
+        w.optionId= product_to_Options.get(w.productId);
+        String featureName = option_to_featureName.get(w.optionId);
+        
+        if(w.index==1000){    //Index set to 1000 by default so the code knows which products need to get a new index number
+            if(indexMap.containsKey(w.productId)){
+                i=indexMap.get(w.productId)+1;
+                indexMap.put(w.productId,i);
+            }else{
+                i=0;
+                indexMap.put(w.productId,i);
+            }
+            
+        }else{
+            i=w.index;
+        }
+        
+        //Create new wrapper based on what user added/update in list
+        wrapConfiguration toAdd = new wrapConfiguration (w.optionId, w.selected,  w.productId, w.Quantity, i, w.readOnly,  w.config1, w.config2);
+        
+        //Creates/Updates Feature Map to Create a List of Feature Name(Which the JSON Needs to the List of New/Editied Lines and Configuration)
+        if(feature_to_config.containsKey(featureName)){
+            tempList=feature_to_config.get(featureName);
+            tempList.add(toAdd);
+            feature_to_config.put(featureName,tempList);
+        }else{
+            tempList.add(toAdd);
+            feature_to_config.put(featureName,tempList);
+        }
+
+        i++;
+    }
+    
+       //Just to show what is being returned(DEBUG ONLY)
+        String testserialize = JSON.serialize(feature_to_config.values());
+        system.debug(testserialize);
+
+        Map<String,Object> root = (Map<String,Object>)JSON.deserializeUntyped(originaljsonInput);
+        system.debug('JSON Passed');
+        //system.debug(root);
+
+        Map<String,Object> rootProduct = (Map<String,Object>)root.get('product');
+        //system.debug('Root Product');
+        //system.debug(rootProduct);
+        masterProduct = (String)rootProduct.get('configuredProductId');
+        createOptionProductMap(masterProduct);
+        Map<String,Object> OptionConfigs=(Map<String,Object>)rootProduct.get('optionConfigurations');
+        for(String s:OptionConfigs.keySet()){
+            system.debug('Option Config/Feature Names:');
+            system.debug(s);
+            wrapConfigs=feature_to_config.get(s);
+            system.debug(wrapConfigs);
+            //IMPORTANT!!!!!  Sets the Features Lines/Configuration Based on the Feature Name
+            if(wrapConfigs!=null){
+                List<Object> Features = (List<Object>)wrapConfigs;
+                OptionConfigs.put(s,features);    
+            }
+        }
+
+            //Serialize the Class Back to JSON, Have to replace _zz to __c so that the field names are correct
+             jsonOutput = JSON.serialize(root);
+             jsonOutput = jsonOutput.replace('Config1', 'Resource_zz');
+             jsonOutput = jsonOutput.replace('_zz', '__c');
+            
+            system.debug(jsonOutput);
+
+
+            return null;
+   }
+
+
+
+    //Used by the Table, Only if you are adding by Table Structure
+    public Pagereference addLine(){
+        //Adds a Blank configuration Wrapper
+        wrapConfigs.add(new wrapconfiguration());
+       return null;
+   }
+
+   
+
+       //Not Needed, Just Select Option Used for a Picklist
+       public List<SelectOption> getProducts(){
+        List<SelectOption> prods=new List<SelectOption>();
+        for(SBQQ__ProductOption__c p:[Select SBQQ__OptionalSKU__c, SBQQ__OptionalSKU__r.Name from SBQQ__ProductOption__c where SBQQ__ConfiguredSKU__c=:masterProduct]){
+         prods.add(new SelectOption(p.SBQQ__OptionalSKU__c, p.SBQQ__OptionalSKU__r.Name));
+        }
+        return prods;
+    }
+ 
+ //Not Needed, Just Select Option Used for a Picklist
+    /*
+    public List<SelectOption> getLocations()
+         {
+         List<SelectOption> options = new List<SelectOption>();
+                 
+         Schema.DescribeFieldResult fieldResult =
+         SBQQ__QuoteLine__c.Location__c.getDescribe();
+         List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+         options.add(new SelectOption('' ,'--None--'));
+         for( Schema.PicklistEntry f : ple)
+         {
+             options.add(new SelectOption(f.getLabel(), f.getValue()));
+         }       
+     return options;
+     }
+     */
+
+ //Not Needed, Just Select Option Used for a Picklist
+ /*
+ public List<SelectOption> getVRTU()
+     {
+         List<SelectOption> options = new List<SelectOption>();
+                 
+         Schema.DescribeFieldResult fieldResult =
+         SBQQ__QuoteLine__c.VRTU_Role__c.getDescribe();
+         List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+         options.add(new SelectOption('' ,'--None--'));
+         for( Schema.PicklistEntry f : ple)
+         {
+             options.add(new SelectOption(f.getLabel(), f.getValue()));
+         }       
+         return options;
+     }
+     */
+     
+ //Not Needed, Just Select Option Used for a Picklist
+    public List<SelectOption> getResourcesList(){
+     List<SelectOption> users=new List<SelectOption>();
+     users.add(new SelectOption('' ,'--None--'));
+     for(User p:[Select id, Name from User where isActive=true]){
+      users.add(new SelectOption(p.id, p.Name));
+     }
+     return users;
+ }
+
+}

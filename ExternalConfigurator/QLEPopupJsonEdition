@@ -1,0 +1,211 @@
+<apex:page controller="QLEPopupJsonEditionv2"  showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" >
+      <html xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+    <head>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+    <title>Salesforce CPQ External Config Demo</title>
+    <!-- easyXDM.min.js compiled and minified JavaScript to communicate with Salesforce CPQ-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/easyXDM/2.4.20/easyXDM.min.js" crossorigin="anonymous"></script>
+<!--<apex:includeScript value="{!$Resource.EasyXDM}"/>-->
+    <!-- Load SLDS stylesheets -->
+      <apex:slds />
+  </head>
+    <apex:form >
+      <apex:outputPanel id="jspanel"> 
+        <!-- easyXDM and Leaflet map for VF for passing config data to/from Salesforc CPQ -->
+        <script type="text/javascript">
+          // Set up the EasyXDM connection to Salesforce CPQ 
+          // to send and receive configuration data
+          var rpc = new easyXDM.Rpc({}, {
+            // method defined in Salesforce CPQ
+            remote: {
+              postMessage: {}
+            },
+      
+            // method for receiving configuration JSON from Salesforce CPQ
+            local: {
+              postMessage: function (message) {
+                console.log("External Config JSON Recieved");
+                  passStringToController(message);
+                console.log(message);
+              }
+            }
+          });
+      
+          // Broadcast function back to Salesforce CPQ to create the config
+          var broadcast = function () {
+              
+              //console.log(document.getElementById("myJS").value);
+              var returnJson = '{!jsonOutput}';
+              alert(returnJson);
+              if(returnJson!=''){
+                  rpc.postMessage('{!jsonOutput}');
+              }
+              
+          }
+
+                                    
+          </script>
+      </apex:outputPanel>
+
+
+            <!--Header Finish-->
+            <apex:actionFunction name="doControllerSave" action="{!confirmChanges}" rerender="jspanel"/>
+    
+             <apex:actionFunction name="passStringToController" action="{!jsonProcess}" rerender="hiddenoutput, tablePanel">
+                <apex:param name="p1" value="" assignTo="{!originaljsonInput}" />
+            </apex:actionFunction>
+
+      <div class="slds-scope">
+
+         <!-- SPINNER -->
+     <apex:actionStatus id="status">
+      <apex:facet name="start">
+          <div class="slds-spinner_container" style="position: fixed;" >
+              <div role="status" class="slds-spinner slds-spinner--large slds-spinner--brand">
+                  <div class="slds-spinner__dot-a"></div>
+                  <div class="slds-spinner__dot-b"></div>
+              </div>
+          </div>
+      </apex:facet>
+  </apex:actionStatus>
+  <!-- / SPINNER -->
+
+
+          <!--Header Start-->
+          <div class="slds-page-header slds-page-header_record-home">
+            <div class="slds-page-header__row">
+            <div class="slds-page-header__col-title">
+            <div class="slds-media">
+            <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-opportunity">
+                <svg aria-hidden="true" class="slds-icon">
+                    <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#dashboard')}"></use>
+                  </svg>
+            <!-- <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+            <use xlink:href="/assets/icons/standard-sprite/svg/symbols.svg#opportunity"></use>
+            </svg> -->
+            </span>
+            </div>
+            <div class="slds-media__body">
+            <div class="slds-page-header__name">
+            <div class="slds-page-header__name-title">
+            <h1>
+            <span>Title Goes Here</span>
+            <span class="slds-page-header__title slds-truncate" title="Acme - 1,200 Widgets">Sub Details Here</span>
+            </h1>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            <div class="slds-page-header__col-actions">
+            <div class="slds-page-header__controls">
+         
+            <div class="slds-page-header__control">
+            <ul class="slds-button-group-list">
+              <li>
+                <apex:commandButton value="Add Line"  action="{!addLine}" rerender="tablePanel" styleClass="slds-button slds-button_neutral" />
+              </li>
+            <li>
+            
+     
+                    <apex:commandButton value="Confirm/QLE" onmousedown="doControllerSave();" oncomplete="broadcast();" styleClass="slds-button slds-button_brand" status="status"/>
+
+            </li>
+            <li>
+              <apex:commandButton action="{!confirmChanges}"  value="Return to QLE" styleClass="slds-button slds-button_brand" rerender="hiddenoutput"/>
+              
+                 <!--<apex:commandLink value="" styleClass="slds-button slds-button_icon slds-button_icon-border slds-button__icon_medium" action="{!reloadPage}" status="status" reRender="stuff">
+ 
+                      <svg aria-hidden="true" class="slds-button__icon ">
+                        <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#loop')}"></use>
+                      </svg>
+                      <span class="slds-assistive-text">Refresh</span>
+                </apex:commandLink> -->
+              
+           
+               
+            </li>
+            <li>
+            
+            <!--<apex:commandLink value="Save" action="{!saveHighLevelPlan}" styleClass="slds-button slds-button_brand"  status="status" reRender="stuff"/>-->
+            </li>
+            <li>
+           
+            </li>
+    
+            </ul>
+            </div>
+            </div>
+            </div>
+            </div>
+            <div class="slds-page-header__row slds-page-header__row_gutters">
+            <div class="slds-page-header__col-details">
+            <ul class="slds-page-header__detail-row">
+            <li class="slds-page-header__detail-block">
+            <div class="slds-text-title slds-truncate" title="Field 1">Field 1</div>
+            <div class="slds-truncate" title="">Field 1 Data Here</div>
+            </li>
+            <li class="slds-page-header__detail-block">
+                <div class="slds-text-title slds-truncate" title="Field 1">Field 2</div>
+                <div class="slds-truncate" title="">Field 2 Data Here</div>
+            </li>
+    
+            <li class="slds-page-header__detail-block">
+                <div class="slds-text-title slds-truncate" title="Field 1">Field 3</div>
+                <div class="slds-truncate" title="">Field 3 Data Here</div>
+            </li>
+    
+            <li class="slds-page-header__detail-block">
+                <div class="slds-text-title slds-truncate" title="Field 1">Field 4</div>
+                <div class="slds-truncate" title="">Field 4 Date Here</div>
+            </li>
+    
+            
+            </ul>
+            </div>
+            </div>
+            </div>
+    
+<apex:outputPanel id="tablePanel">
+  <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+    <thead>
+    <tr><th>Selected</th><th>Quantity</th><th>Product</th><th>Resource</th> </tr>
+  </thead>
+
+<apex:repeat value="{!wrapConfigs}" var="wrap">
+  <tr>
+  <td><apex:inputCheckbox value="{!wrap.Selected}"/></td>
+  <td><apex:inputText value="{!wrap.Quantity}"/></td>
+    <td><apex:selectList value="{!wrap.productId}" size="1">
+        <apex:selectOptions value="{!products}"/>
+      </apex:selectList>
+    </td>
+    
+      <td>
+       
+        <apex:selectList value="{!wrap.config1}" size="1">
+        <apex:selectOptions value="{!resourcesList}"/>
+      </apex:selectList>
+      </td>
+    </tr>
+</apex:repeat>
+</table>
+
+</apex:outputPanel>
+
+
+            <p style="padding-top:20px;">
+                <apex:outputPanel id="hiddenoutput">
+                    <b>The below fields display the input and output for testing purposes</b><br/><br/>
+                    Original Input (JSON): &nbsp;<input id="myOriginalJS" value="{!originaljsonInput}"/><br/>  
+                    Returned Output (JSON): &nbsp;<input id="myJS" value="{!jsonOutput}"/><br/>
+                </apex:outputPanel>
+            </p>
+
+</div>
+</apex:form>
+</html>
+</apex:page>
